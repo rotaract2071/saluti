@@ -6,31 +6,57 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Saluti</title>
 	<style>
+		@font-face {
+			font-family: 'Open Sans';
+			font-style: normal;
+			font-weight: 300 800;
+			font-stretch: 100%;
+			font-display: swap;
+			src: url(OpenSans.woff2) format('woff2');
+			unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+		}
+
 		* {
-			font-family: system-ui, sans-serif;
+			font-family: 'Open Sans', system-ui, sans-serif;
 		}
 
 		@media print {
 			form {
 				display: none;
 			}
+
+			ol {
+				columns: 2;
+			}
+
+			li {
+				break-inside: avoid-column;
+			}
 		}
 	</style>
 	<script type="module">
 		const form = document.querySelector("form")
 		const template = document.querySelector("template")
-		const button = document.querySelector("button")
+		const addButton = document.querySelector("button#add")
 		const ol = document.querySelector("ol")
 
 		const now = new Date()
 		const currentYear = now.getFullYear() - (now.getMonth() <= 6 ? 1 : 0)
 
-		button.addEventListener("click", (ev) => {
-			button.insertAdjacentElement("beforebegin", template.content.firstElementChild.cloneNode(true))
+		addButton.addEventListener("click", (ev) => {
+			const fieldset = template.content.firstElementChild.cloneNode(true)
+			form.append(fieldset)
+			fieldset.querySelector('input[name="name"]').focus()
 		})
 
 		form.addEventListener("submit", (ev) => {
 			ev.preventDefault()
+			renderList()
+		})
+
+		new MutationObserver(renderList).observe(form, { childList: true })
+
+		function renderList() {
 			const list = Array.from(form.querySelectorAll("fieldset"))
 				.map((f) => ({
 					name: f.querySelector('input[name="name"]').value,
@@ -54,40 +80,43 @@
 				})
 			ol.innerHTML = ""
 			ol.append(...list)
-		})
+		}
 
-		button.click()
+		addButton.click()
 	</script>
 </head>
 
 <body class="container">
+	<h1>Saluti! 👋</h1>
 	<main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr))">
 		<form>
+			<button type="button" id="add">➕</button>
+			<button type="button" onclick="window.print()">Stampa</button>
 			<template>
 				<fieldset>
 					<input type="text" name="name" placeholder="Nome" oninput="this.closest('form').requestSubmit()">
 					<select name="role" onchange="this.closest('form').requestSubmit()">
 						<optgroup label="Direttivo distrettuale">
-							<option value="1">Rappresentante Distrettuale</option>
-							<option value="2">Segretario Distrettuale</option>
-							<option value="3">Tesoriere Distrettuale</option>
-							<option value="4">Prefetto Distrettuale</option>
+							<option value="001">Rappresentante Distrettuale</option>
+							<option value="002">Segretario Distrettuale</option>
+							<option value="003">Tesoriere Distrettuale</option>
+							<option value="004">Prefetto Distrettuale</option>
 						</optgroup>
 						<optgroup label="Esecutivo distrettuale">
-							<option value="10">Presidente Commissione Azione Interna</option>
-							<option value="11">Delegato di zona</option>
-							<option value="12">Presidente Commissione Azione Interesse Pubblico</option>
-							<option value="13">Presidente Commissione Azione Internazionale</option>
-							<option value="14">Presidente Commissione Azione Nuove Generazioni</option>
-							<option value="15">Presidente Commissione Azione Professionale</option>
-							<option value="16">Presidente Commissione Comunicazione e Informatica</option>
-							<option value="17">Presidente Commissione Cultura</option>
-							<option value="18">Presidente Commissione Regolamento</option>
-							<option value="19">Presidente Commissione Revisione dei Conti</option>
-							<option value="20">Presidente Commissione Sport</option>
-							<option value="21">Presidente Sottocommissione Fondazione Rotary</option>
-							<option value="22">Presidente Sottocommissione Sviluppo Effettivo</option>
-							<option value="23">Membro di commissione</option>
+							<option value="010">Presidente Commissione Azione Interna</option>
+							<option value="011">Delegato di zona</option>
+							<option value="012">Presidente Commissione Azione Interesse Pubblico</option>
+							<option value="013">Presidente Commissione Azione Internazionale</option>
+							<option value="014">Presidente Commissione Azione Nuove Generazioni</option>
+							<option value="015">Presidente Commissione Azione Professionale</option>
+							<option value="016">Presidente Commissione Comunicazione e Informatica</option>
+							<option value="017">Presidente Commissione Cultura</option>
+							<option value="018">Presidente Commissione Regolamento</option>
+							<option value="019">Presidente Commissione Revisione dei Conti</option>
+							<option value="020">Presidente Commissione Sport</option>
+							<option value="021">Presidente Sottocommissione Fondazione Rotary</option>
+							<option value="022">Presidente Sottocommissione Sviluppo Effettivo</option>
+							<option value="023">Membro di commissione</option>
 						</optgroup>
 						<optgroup label="Cariche di club">
 							<option value="100">Presidente</option>
@@ -100,10 +129,9 @@
 						</optgroup>
 					</select>
 					<input type="number" name="year" min="1900" max="2100" placeholder="A.R." value="2023" oninput="this.closest('form').requestSubmit()">
-					<button type="button" onclick="this.parentElement.remove()">-</button>
+					<button type="button" onclick="this.parentElement.remove()">🗑️</button>
 				</fieldset>
 			</template>
-			<button type="button">+</button>
 		</form>
 		<ol></ol>
 	</main>
