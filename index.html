@@ -55,41 +55,32 @@
 </head>
 
 <body class="container">
-	<main style="display: grid; grid-template-columns: repeat(2, minmax(0%, 1fr));">
+	<main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr))">
 		<form>
 			<template>
 				<fieldset>
-					<label>
-						Nome
-						<input type="text" name="name" oninput="this.closest('form').requestSubmit()">
-					</label>
-					<label>
-						Carica
-						<select name="role" onchange="this.closest('form').requestSubmit()">
-							<optgroup label="Direttivo distrettuale">
-								<option value="1">Rappresentante Distrettuale</option>
-								<option value="2">Segretario Distrettuale</option>
-								<option value="3">Tesoriere Distrettuale</option>
-								<option value="4">Prefetto Distrettuale</option>
-							</optgroup>
-							<optgroup label="Esecutivo distrettuale">
-								<option value="10">Presidente di commissione</option>
-								<option value="11">Delegato di zona</option>
-							</optgroup>
-							<optgroup label="Cariche di club">
-								<option value="100">Presidente</option>
-								<option value="101">Vicepresidente</option>
-								<option value="103">Segretario</option>
-								<option value="104">Tesoriere</option>
-								<option value="105">Prefetto</option>
-								<option value="106">Consigliere</option>
-							</optgroup>
-						</select>
-					</label>
-					<label>
-						A.R.
-						<input type="number" name="year" min="1900" max="2100" oninput="this.closest('form').requestSubmit()">
-					</label>
+					<input type="text" name="name" placeholder="Nome" oninput="this.closest('form').requestSubmit()">
+					<select name="role" onchange="this.closest('form').requestSubmit()">
+						<optgroup label="Direttivo distrettuale">
+							<option value="1">Rappresentante Distrettuale</option>
+							<option value="2">Segretario Distrettuale</option>
+							<option value="3">Tesoriere Distrettuale</option>
+							<option value="4">Prefetto Distrettuale</option>
+						</optgroup>
+						<optgroup label="Esecutivo distrettuale">
+							<option value="10">Presidente di commissione</option>
+							<option value="11">Delegato di zona</option>
+						</optgroup>
+						<optgroup label="Cariche di club">
+							<option value="100">Presidente</option>
+							<option value="101">Vicepresidente</option>
+							<option value="103">Segretario</option>
+							<option value="104">Tesoriere</option>
+							<option value="105">Prefetto</option>
+							<option value="106">Consigliere</option>
+						</optgroup>
+					</select>
+					<input type="number" name="year" min="1900" max="2100" placeholder="A.R." oninput="this.closest('form').requestSubmit()">
 					<button type="button" onclick="this.parentElement.remove(); this.closest('form').requestSubmit()">-</button>
 				</fieldset>
 			</template>
