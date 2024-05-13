@@ -24,29 +24,23 @@
 			form {
 				display: none;
 			}
-
-			ol {
-				columns: 2;
-			}
-
-			li {
-				break-inside: avoid-column;
-			}
 		}
 	</style>
 	<script type="module">
-		const form = document.querySelector("form")
-		const template = document.querySelector("template")
-		const addButton = document.querySelector("button#add")
-		const ol = document.querySelector("ol")
+		// @ts-check
+
+		const form = /** @type {HTMLFormElement} */ (document.querySelector("form"))
+		const template = /** @type {HTMLTemplateElement} */ (document.querySelector("template"))
+		const addButton = /** @type {HTMLButtonElement} */ (document.querySelector("#add"))
+		const ol = /** @type {HTMLOListElement} */ (document.querySelector("ol"))
 
 		const now = new Date()
 		const currentYear = now.getFullYear() - (now.getMonth() <= 6 ? 1 : 0)
 
 		addButton.addEventListener("click", (ev) => {
-			const fieldset = template.content.firstElementChild.cloneNode(true)
-			form.append(fieldset)
-			fieldset.querySelector('input[name="name"]').focus()
+			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
+			form.append(fieldset);
+			/** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]')).focus()
 		})
 
 		form.addEventListener("submit", (ev) => {
@@ -58,35 +52,59 @@
 
 		function renderList() {
 			const list = Array.from(form.querySelectorAll("fieldset"))
-				.map((f) => ({
-					name: f.querySelector('input[name="name"]').value,
-					role: f.querySelector('select[name="role"]').selectedOptions[0].innerText,
-					sortOrder: parseInt(f.querySelector('select[name="role"]').value),
-					year: parseInt(f.querySelector('input[name="year"]').value),
-				}))
+				.map(fieldsetToItem)
 				.filter(({ name, year }) => name !== "" && !isNaN(year))
-				.sort((a, b) => {
-					if (a.sortOrder === b.sortOrder) {
-						if (a.year === currentYear) return -1
-						if (b.year === currentYear) return 1
-						return a.year - b.year
-					}
-					return a.sortOrder - b.sortOrder
-				})
+				.sort(sort)
 				.map(({ name, role, year }) => {
 					const li = document.createElement("li")
-					li.innerHTML = `<b>${name}</b><br><small>${role}<br>A.R. ${year}/${year + 1}</small>`
+					const b = document.createElement("b")
+					b.innerText = name
+					li.append(b)
+					li.innerHTML += `<br><small>${role}<br>A.R. ${year}/${year + 1}</small>`
 					return li
 				})
 			ol.innerHTML = ""
 			ol.append(...list)
 		}
 
+		/** @typedef {{name: string, role: string, sortOrder: number, year: number}} Item */
+		
+		/**
+		 * @param {HTMLFieldSetElement} fieldset
+		 * @return {Item}
+		 */
+		function fieldsetToItem(fieldset) {
+			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
+			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
+			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
+
+			return {
+				name: nameInput.value,
+				role: roleSelect.selectedOptions[0].innerText,
+				sortOrder: parseInt(roleSelect.value),
+				year: parseInt(yearInput.value),
+			}
+		}
+		
+		/**
+		 * @param {Item} a
+		 * @param {Item} b
+		 * @return number
+		 */
+		function sort(a, b) {
+			if (a.sortOrder === b.sortOrder) {
+				if (a.year === currentYear) return -1
+				if (b.year === currentYear) return 1
+				return a.year - b.year
+			}
+			return a.sortOrder - b.sortOrder
+		}
+
 		addButton.click()
 	</script>
 </head>
 
-<body class="container">
+<body>
 	<h1>Saluti! 👋</h1>
 	<main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr))">
 		<form>
