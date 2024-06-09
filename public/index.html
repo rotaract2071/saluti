@@ -165,7 +165,7 @@
 			<button type="button" onclick="window.print()">Stampa</button>
 			<template>
 				<fieldset>
-					<input type="text" name="name" placeholder="Nome" oninput="this.closest('form').requestSubmit()">
+					<input type="text" name="name" placeholder="Nome" oninput="this.closest('form').requestSubmit()" autocapitalize="words">
 					<select name="role" onchange="this.closest('form').requestSubmit()">
 						<optgroup label="Direttivo distrettuale">
 							<option value="001">Rappresentante Distrettuale/Governatore</option>
