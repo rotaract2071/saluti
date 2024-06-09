@@ -33,9 +33,11 @@
 		const template = /** @type {HTMLTemplateElement} */ (document.querySelector("template"))
 		const addButton = /** @type {HTMLButtonElement} */ (document.querySelector("#add"))
 		const ol = /** @type {HTMLOListElement} */ (document.querySelector("ol"))
+		const currentYearSpan = /** @type {HTMLSpanElement} */ (document.getElementById("currentYear"))
 
 		const now = new Date()
 		const currentYear = now.getFullYear() - (now.getMonth() <= 6 ? 1 : 0)
+		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 
 		addButton.addEventListener("click", (ev) => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
@@ -91,6 +93,10 @@
 		}
 
 		/**
+		 * Roughly equivalent to a SQL ordering clause along the lines of
+		 * `ORDER BY roleSortOrder ASC, year ASC, associationSortOrder ASC`
+		 * with a special case handling for the current year.
+		 *
 		 * @param {Item} a
 		 * @param {Item} b
 		 * @return number
@@ -183,6 +189,9 @@
 		</form>
 		<ol></ol>
 	</main>
+	<footer>
+		<small>I calcoli sono effettuati considerando come annata corrente l'A.R. <span id="currentYear"></span>.</small>
+	</footer>
 </body>
 
 </html>
