@@ -31,7 +31,8 @@
 
 		const form = /** @type {HTMLFormElement} */ (document.querySelector("form"))
 		const template = /** @type {HTMLTemplateElement} */ (document.querySelector("template"))
-		const addButton = /** @type {HTMLButtonElement} */ (document.querySelector("#add"))
+		const addButton = /** @type {HTMLButtonElement} */ (document.getElementById("add"))
+		const shareButton = /** @type {HTMLButtonElement} */ (document.getElementById("share"))
 		const ol = /** @type {HTMLOListElement} */ (document.querySelector("ol"))
 		const currentYearSpan = /** @type {HTMLSpanElement} */ (document.getElementById("currentYear"))
 
@@ -45,6 +46,16 @@
 			yearInput.value = currentYear.toString()
 			form.append(fieldset);
 			/** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]')).focus()
+		})
+
+		shareButton.addEventListener("click", (ev) => {
+			const text = listToText(ol)
+			try {
+				navigator.share({ text })
+			} catch {
+				navigator.clipboard.writeText(text)
+				alert("Saluti copiati negli appunti!")
+			}
 		})
 
 		form.addEventListener("submit", (ev) => {
@@ -62,6 +73,14 @@
 				.map(itemToListItem)
 			ol.innerHTML = ""
 			ol.append(...list)
+		}
+
+		/**
+		 * @param {HTMLOListElement} ol
+		 * @returns {string}
+		 */
+		function listToText(ol) {
+			return Array.from(ol.querySelectorAll("li")).map((li, index) => `${index+1} - ${li.innerText}`).join("\n\n")
 		}
 
 		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Item */
@@ -97,7 +116,7 @@
 		/**
 		 * Roughly equivalent to a SQL ordering clause along the lines of
 		 * `ORDER BY roleSortOrder ASC, year ASC, associationSortOrder ASC`
-		 * with a special case handling for the current year.
+		 * with special handling for the current year case.
 		 *
 		 * @param {Item} a
 		 * @param {Item} b
@@ -142,6 +161,7 @@
 	<main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr))">
 		<form>
 			<button type="button" id="add">➕</button>
+			<button type="button" id="share">Condividi</button>
 			<button type="button" onclick="window.print()">Stampa</button>
 			<template>
 				<fieldset>
