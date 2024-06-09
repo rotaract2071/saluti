@@ -53,22 +53,15 @@
 		function renderList() {
 			const list = Array.from(form.querySelectorAll("fieldset"))
 				.map(fieldsetToItem)
-				.filter(({ name, year }) => name !== "" && !isNaN(year))
-				.sort(sort)
-				.map(({ name, role, year }) => {
-					const li = document.createElement("li")
-					const b = document.createElement("b")
-					b.innerText = name
-					li.append(b)
-					li.innerHTML += `<br><small>${role}<br>A.R. ${year}/${year + 1}</small>`
-					return li
-				})
+				.filter(nonEmptyItem)
+				.sort(sortItems)
+				.map(itemToListItem)
 			ol.innerHTML = ""
 			ol.append(...list)
 		}
 
-		/** @typedef {{name: string, role: string, sortOrder: number, year: number}} Item */
-		
+		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Item */
+
 		/**
 		 * @param {HTMLFieldSetElement} fieldset
 		 * @return {Item}
@@ -76,28 +69,59 @@
 		function fieldsetToItem(fieldset) {
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
+			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
 
 			return {
 				name: nameInput.value,
 				role: roleSelect.selectedOptions[0].innerText,
-				sortOrder: parseInt(roleSelect.value),
+				association: associationSelect.selectedOptions[0].innerText,
+				roleSortOrder: parseInt(roleSelect.value),
+				associationSortOrder: parseInt(associationSelect.value),
 				year: parseInt(yearInput.value),
 			}
 		}
-		
+
+		/**
+		 * @param {Item} item
+		 * @return {boolean}
+		 */
+		function nonEmptyItem({ name, year }) {
+			return name !== "" && !isNaN(year)
+		}
+
 		/**
 		 * @param {Item} a
 		 * @param {Item} b
 		 * @return number
 		 */
-		function sort(a, b) {
-			if (a.sortOrder === b.sortOrder) {
+		function sortItems(a, b) {
+			if (a.roleSortOrder === b.roleSortOrder) {
+				if (a.year === b.year) {
+					return a.associationSortOrder - b.associationSortOrder
+				}
 				if (a.year === currentYear) return -1
 				if (b.year === currentYear) return 1
 				return a.year - b.year
 			}
-			return a.sortOrder - b.sortOrder
+			return a.roleSortOrder - b.roleSortOrder
+		}
+
+		/**
+		 * @param {Item} item
+		 * @return {HTMLLIElement}
+		 */
+		function itemToListItem(item) {
+			const li = document.createElement("li")
+			const b = document.createElement("b")
+			b.innerText = item.name
+			li.append(b)
+			let role = item.role
+			if (item.roleSortOrder === 1) {
+				role = item.association === "Rotary" ? "Governatore" : "Rappresentante Distrettuale"
+			}
+			li.innerHTML += `<br><small>${role} ${item.association}<br>A.R. ${item.year}/${item.year + 1}</small>`
+			return li
 		}
 
 		addButton.click()
@@ -105,6 +129,7 @@
 </head>
 
 <body>
+	<noscript>Devi abilitare JavaScript per utilizzare questa webapp.</noscript>
 	<h1>Saluti! 👋</h1>
 	<main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr))">
 		<form>
@@ -115,7 +140,7 @@
 					<input type="text" name="name" placeholder="Nome" oninput="this.closest('form').requestSubmit()">
 					<select name="role" onchange="this.closest('form').requestSubmit()">
 						<optgroup label="Direttivo distrettuale">
-							<option value="001">Rappresentante Distrettuale</option>
+							<option value="001">Rappresentante Distrettuale/Governatore</option>
 							<option value="002">Segretario Distrettuale</option>
 							<option value="003">Tesoriere Distrettuale</option>
 							<option value="004">Prefetto Distrettuale</option>
@@ -145,6 +170,11 @@
 							<option value="106">Consigliere</option>
 							<option value="107">Socio</option>
 						</optgroup>
+					</select>
+					<select name="association" onchange="this.closest('form').requestSubmit()">
+						<option value="1">Rotary</option>
+						<option value="2" selected>Rotaract</option>
+						<option value="3">Interact</option>
 					</select>
 					<input type="number" name="year" min="1900" max="2100" placeholder="A.R." value="2023" oninput="this.closest('form').requestSubmit()">
 					<button type="button" onclick="this.parentElement.remove()">🗑️</button>
