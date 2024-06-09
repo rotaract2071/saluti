@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Saluti</title>
+	<title>Saluti! 👋</title>
 	<style>
 		@font-face {
 			font-family: 'Open Sans';
@@ -42,14 +42,19 @@
 
 		addButton.addEventListener("click", (ev) => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
+			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
 			yearInput.value = currentYear.toString()
 			form.append(fieldset);
-			/** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]')).focus()
+			nameInput.focus()
 		})
 
 		shareButton.addEventListener("click", (ev) => {
 			const text = listToText(ol)
+			if (text === "") {
+				alert("Inserisci almeno un nominativo.")
+				return
+			}
 			try {
 				navigator.share({ text })
 			} catch {
@@ -64,6 +69,10 @@
 		})
 
 		new MutationObserver(renderList).observe(form, { childList: true })
+
+		addButton.click()
+
+		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Item */
 
 		function renderList() {
 			const list = Array.from(form.querySelectorAll("fieldset"))
@@ -80,10 +89,10 @@
 		 * @returns {string}
 		 */
 		function listToText(ol) {
-			return Array.from(ol.querySelectorAll("li")).map((li, index) => `${index+1} - ${li.innerText}`).join("\n\n")
+			return Array.from(ol.querySelectorAll("li"))
+				.map((li, index) => `${index + 1} - ${li.innerText}`)
+				.join("\n\n")
 		}
-
-		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Item */
 
 		/**
 		 * @param {HTMLFieldSetElement} fieldset
@@ -150,13 +159,11 @@
 			li.innerHTML += `<br><small>${role} ${item.association}<br>A.R. ${item.year}/${item.year + 1}</small>`
 			return li
 		}
-
-		addButton.click()
 	</script>
 </head>
 
 <body>
-	<noscript>Devi abilitare JavaScript per utilizzare questa webapp.</noscript>
+	<noscript>Abilita JavaScript per utilizzare questa web app.</noscript>
 	<h1>Saluti! 👋</h1>
 	<main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr))">
 		<form>
