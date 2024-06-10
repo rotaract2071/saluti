@@ -54,7 +54,17 @@
 		addButton.addEventListener("click", (ev) => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
+			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
+			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
+			const removeButton = /** @type {HTMLButtonElement} */(fieldset.querySelector("button.remove"))
+
+			nameInput.addEventListener("input", requestFormSubmit)
+			roleSelect.addEventListener("change", requestFormSubmit)
+			associationSelect.addEventListener("change", requestFormSubmit)
+			yearInput.addEventListener("input", requestFormSubmit)
+			removeButton.addEventListener("click", () => fieldset.remove())
+			
 			yearInput.value = currentYear.toString()
 			form.append(fieldset);
 			nameInput.focus()
@@ -85,6 +95,10 @@
 
 		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Item */
 
+		function requestFormSubmit() {
+			form.requestSubmit()
+		}
+		
 		function renderList() {
 			const list = Array.from(form.querySelectorAll("fieldset"))
 				.map(fieldsetToItem)
@@ -185,11 +199,11 @@
 						<fieldset>
 							<label>
 								Nome
-								<input type="text" name="name" placeholder="Nome" oninput="this.closest('form').requestSubmit()" autocapitalize="words" autocomplete="name">
+								<input type="text" name="name" placeholder="Nome" autocapitalize="words" autocomplete="name">
 							</label>
 							<label>
 								Carica
-								<select name="role" onchange="this.closest('form').requestSubmit()">
+								<select name="role">
 									<optgroup label="Direttivo distrettuale">
 										<option value="001">Rappresentante Distrettuale/Governatore</option>
 										<option value="002">Segretario Distrettuale</option>
@@ -226,7 +240,7 @@
 							<div role="group">
 								<label>
 									Associazione
-									<select name="association" onchange="this.closest('form').requestSubmit()">
+									<select name="association">
 										<option value="1">Rotary</option>
 										<option value="2" selected>Rotaract</option>
 										<option value="3">Interact</option>
@@ -234,10 +248,10 @@
 								</label>
 								<label>
 									A.R.
-									<input type="number" name="year" min="1900" max="2100" placeholder="A.R." oninput="this.closest('form').requestSubmit()">
+									<input type="number" name="year" min="1900" max="2100" placeholder="A.R.">
 								</label>
 							</div>
-							<button type="button" class="secondary outline" onclick="this.closest('fieldset').remove()">🗑️ Rimuovi</button>
+							<button type="button" class="secondary outline remove">🗑️ Rimuovi</button>
 						</fieldset>
 					</template>
 				</form>
