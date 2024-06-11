@@ -33,6 +33,7 @@
 				background-color: white;
 				color: black !important;
 			}
+
 			h1,
 			#participants,
 			button,
@@ -55,7 +56,7 @@
 		const currentYear = now.getFullYear() - (now.getMonth() <= 6 ? 1 : 0)
 		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 
-		addButton.addEventListener("click", (ev) => {
+		addButton.addEventListener("click", () => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
@@ -68,7 +69,7 @@
 			associationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", requestFormSubmit)
 			removeButton.addEventListener("click", () => fieldset.remove())
-			
+
 			yearInput.value = currentYear.toString()
 			form.append(fieldset);
 			nameInput.focus()
@@ -99,15 +100,15 @@
 		function requestFormSubmit() {
 			form.requestSubmit()
 		}
-		
+
 		function renderList() {
-			const list = Array.from(form.querySelectorAll("fieldset"))
+			const listItems = Array.from(form.querySelectorAll("fieldset"))
 				.map(fieldsetToItem)
 				.filter(nonEmptyItem)
 				.sort(sortItems)
 				.map(itemToListItem)
 			ol.innerHTML = ""
-			ol.append(...list)
+			ol.append(...listItems)
 		}
 
 		/**
@@ -158,15 +159,15 @@
 		 * @returns number
 		 */
 		function sortItems(a, b) {
-			if (a.roleSortOrder === b.roleSortOrder) {
-				if (a.year === b.year) {
-					return a.associationSortOrder - b.associationSortOrder
-				}
-				if (a.year === currentYear) return -1
-				if (b.year === currentYear) return 1
+			if (a.roleSortOrder !== b.roleSortOrder) {
+				return a.roleSortOrder - b.roleSortOrder
+			}
+			if (a.year === currentYear) return -1
+			if (b.year === currentYear) return 1
+			if (a.year !== b.year) {
 				return a.year - b.year
 			}
-			return a.roleSortOrder - b.roleSortOrder
+			return a.associationSortOrder - b.associationSortOrder
 		}
 
 		/**
@@ -274,10 +275,9 @@
 			<br>
 			Comm. Comunicazione e Informatica A.R. 2024/25 ✌️
 			<br>
-			L'algoritmo considera come annata corrente l'A.R. <span id="currentYear"></span>.
+			L'algoritmo considera come annata corrente l'A.R. <span id="currentYear"></span>
 		</small>
 	</footer>
-	
 </body>
 
 </html>
