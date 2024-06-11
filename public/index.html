@@ -29,6 +29,10 @@
 		}
 
 		@media print {
+			* {
+				background-color: white;
+				color: black !important;
+			}
 			h1,
 			#participants,
 			button,
@@ -255,13 +259,15 @@
 						</fieldset>
 					</template>
 				</form>
-				<button type="button" class="outline" id="add">➕ Aggiungi</button>
+				<button type="button" id="add">➕ Aggiungi</button>
 			</section>
 			<section>
 				<h2>Ordine dei saluti</h2>
-				<button type="button" class="outline" id="share">🔁 Condividi</button>
-				<button type="button" class="outline" onclick="window.print()">🖨️ Stampa</button>
-				<ol style="position: sticky; top: var(--pico-spacing)"></ol>
+				<div role="presentation" style="position: sticky; top: var(--pico-spacing)">
+					<button type="button" id="share">🔁 Condividi</button>
+					<button type="button" onclick="window.print()">🖨️ Stampa</button>
+					<ol></ol>
+				</div>
 			</section>
 		</div>
 	</main>
