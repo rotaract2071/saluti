@@ -55,7 +55,6 @@
 
 		const now = new Date()
 		const currentYear = now.getFullYear() - (now.getMonth() <= 6 ? 1 : 0)
-		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 
 		addButton.addEventListener("click", () => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
@@ -94,9 +93,10 @@
 			}
 		})
 
+		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 		addButton.click()
 
-		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Item */
+		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Person */
 
 		function requestFormSubmit() {
 			form.requestSubmit()
@@ -104,10 +104,10 @@
 
 		function renderList() {
 			const listItems = Array.from(form.querySelectorAll("fieldset"))
-				.map(fieldsetToItem)
-				.filter(nonEmptyItem)
-				.sort(sortItems)
-				.map(itemToListItem)
+				.map(fieldsetToPerson)
+				.filter(personHasNameAndYear)
+				.sort(sortPeople)
+				.map(personToListItem)
 			ol.innerHTML = ""
 			ol.append(...listItems)
 		}
@@ -124,9 +124,9 @@
 
 		/**
 		 * @param {HTMLFieldSetElement} fieldset
-		 * @returns {Item}
+		 * @returns {Person}
 		 */
-		function fieldsetToItem(fieldset) {
+		function fieldsetToPerson(fieldset) {
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
 			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
@@ -143,10 +143,10 @@
 		}
 
 		/**
-		 * @param {Item} item
+		 * @param {Person} person
 		 * @returns {boolean}
 		 */
-		function nonEmptyItem({ name, year }) {
+		function personHasNameAndYear({ name, year }) {
 			return name !== "" && !isNaN(year)
 		}
 
@@ -155,11 +155,11 @@
 		 * `ORDER BY roleSortOrder ASC, year ASC, associationSortOrder ASC`
 		 * with special handling for the current year case.
 		 *
-		 * @param {Item} a
-		 * @param {Item} b
+		 * @param {Person} a
+		 * @param {Person} b
 		 * @returns number
 		 */
-		function sortItems(a, b) {
+		function sortPeople(a, b) {
 			if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
 			if (a.year === currentYear) return -1
 			if (b.year === currentYear) return 1
@@ -168,19 +168,19 @@
 		}
 
 		/**
-		 * @param {Item} item
+		 * @param {Person} person
 		 * @returns {HTMLLIElement}
 		 */
-		function itemToListItem(item) {
+		function personToListItem(person) {
 			const li = document.createElement("li")
 			const b = document.createElement("b")
-			b.innerText = item.name
+			b.innerText = person.name
 			li.append(b)
-			let role = item.role
-			if (item.roleSortOrder === 1) {
-				role = item.association === "Rotary" ? "Governatore" : "Rappresentante Distrettuale"
+			let role = person.role
+			if (person.roleSortOrder === 1) {
+				role = person.association === "Rotary" ? "Governatore" : "Rappresentante Distrettuale"
 			}
-			li.innerHTML += `<br><small>${role} ${item.association}<br>A.R. ${item.year}/${item.year + 1}</small>`
+			li.innerHTML += `<br><small>${role} ${person.association}<br>A.R. ${person.year}/${person.year + 1}</small>`
 			return li
 		}
 	</script>
@@ -270,7 +270,7 @@
 		<small>
 			Credits: <a href="https://danieleambrosino.it" target="_blank">Daniele</a> (💻), Malvina e Grazia (🖼️)
 			<br>
-			Comm. Comunicazione e Informatica A.R. 2024/25 ✌️
+			Comm. Comunicazione e Informatica A.R. 2024/2025 ✌️
 			<br>
 			L'algoritmo considera come annata corrente l'A.R. <span id="currentYear"></span>
 		</small>
