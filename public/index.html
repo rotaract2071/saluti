@@ -103,13 +103,13 @@
 		}
 
 		function renderList() {
-			const listItems = Array.from(form.querySelectorAll("fieldset"))
+			ol.replaceChildren(...Array
+				.from(form.querySelectorAll("fieldset"))
 				.map(fieldsetToPerson)
 				.filter(personHasNameAndYear)
 				.sort(sortPeople)
 				.map(personToListItem)
-			ol.innerHTML = ""
-			ol.append(...listItems)
+			)
 		}
 
 		/**
