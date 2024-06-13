@@ -117,7 +117,8 @@
 		 * @returns {string}
 		 */
 		function listToText(ol) {
-			return Array.from(ol.querySelectorAll("li"))
+			return Array
+				.from(ol.querySelectorAll("li"))
 				.map((li, index) => `${index + 1} - ${li.innerText}`)
 				.join("\n\n")
 		}
