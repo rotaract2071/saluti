@@ -56,6 +56,10 @@
 		const now = new Date()
 		const currentYear = now.getFullYear() - (now.getMonth() <= 6 ? 1 : 0)
 
+		form.addEventListener("submit", (e) => e.preventDefault())
+		form.addEventListener("submit", renderList)
+		new MutationObserver(renderList).observe(form, { childList: true })
+
 		addButton.addEventListener("click", () => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
@@ -66,18 +70,16 @@
 
 			nameInput.addEventListener("input", requestFormSubmit)
 			roleSelect.addEventListener("change", requestFormSubmit)
+			associationSelect.addEventListener("change", () => filterRoles(roleSelect.options, associationSelect.selectedOptions[0].innerText))
 			associationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", requestFormSubmit)
 			removeButton.addEventListener("click", () => fieldset.remove())
 
 			yearInput.value = currentYear.toString()
-			form.append(fieldset);
+			filterRoles(roleSelect.options, associationSelect.selectedOptions[0].innerText)
+			form.append(fieldset)
 			nameInput.focus()
 		})
-
-		form.addEventListener("submit", (e) => e.preventDefault())
-		form.addEventListener("submit", renderList)
-		new MutationObserver(renderList).observe(form, { childList: true })
 
 		shareButton.addEventListener("click", () => {
 			const text = listToText(ol)
@@ -100,6 +102,22 @@
 
 		function requestFormSubmit() {
 			form.requestSubmit()
+		}
+
+		/**
+		 * @param {HTMLOptionsCollection} optionsCollection
+		 * @param {string} association
+		 */
+		function filterRoles(optionsCollection, association) {
+			const options = Array.from(optionsCollection)
+			options.forEach((el) => {
+				el.style.display = "none"
+			})
+			options
+				.filter((option) => option.dataset.association === undefined || option.dataset.association === association)
+				.forEach((option) => option.style.removeProperty("display"))
+			options
+				.filter((option) => option.style.display === "")[0].selected = true
 		}
 
 		function renderList() {
@@ -177,10 +195,7 @@
 			const b = document.createElement("b")
 			b.innerText = person.name
 			li.append(b)
-			let role = person.role
-			if (person.roleSortOrder === 1) {
-				role = person.association === "Rotary" ? "Governatore" : "Rappresentante Distrettuale"
-			}
+			const role = person.role
 			li.innerHTML += `<br><small>${role} ${person.association}<br>A.R. ${person.year}/${person.year + 1}</small>`
 			return li
 		}
@@ -202,29 +217,41 @@
 								<input type="text" name="name" placeholder="Nome" autocapitalize="words" autocomplete="name">
 							</label>
 							<label>
+								Associazione
+								<select name="association">
+									<option value="1">Rotary</option>
+									<option value="2" selected>Rotaract</option>
+									<option value="3">Interact</option>
+								</select>
+							</label>
+							<label>
 								Carica
 								<select name="role">
 									<optgroup label="Direttivo distrettuale">
-										<option value="001">Rappresentante Distrettuale/Governatore</option>
-										<option value="002">Segretario Distrettuale</option>
-										<option value="003">Tesoriere Distrettuale</option>
-										<option value="004">Prefetto Distrettuale</option>
+										<option data-association="Rotary" value="001">Governatore</option>
+										<option data-association="Rotaract" value="002">Rappresentante Distrettuale</option>
+										<option data-association="Interact" value="002">Rappresentante Distrettuale</option>
+										<option value="003">Segretario Distrettuale</option>
+										<option value="004">Tesoriere Distrettuale</option>
+										<option value="005">Prefetto Distrettuale</option>
+										<option data-association="Rotary" value="006">Assistente del Governatore</option>
 									</optgroup>
 									<optgroup label="Esecutivo distrettuale">
-										<option value="010">Presidente Commissione Azione Interna</option>
-										<option value="011">Delegato di zona</option>
-										<option value="012">Presidente Commissione Azione Interesse Pubblico</option>
-										<option value="013">Presidente Commissione Azione Internazionale</option>
-										<option value="014">Presidente Commissione Azione Nuove Generazioni</option>
-										<option value="015">Presidente Commissione Azione Professionale</option>
-										<option value="016">Presidente Commissione Comunicazione e Informatica</option>
-										<option value="017">Presidente Commissione Cultura</option>
-										<option value="018">Presidente Commissione Regolamento</option>
-										<option value="019">Presidente Commissione Revisione dei Conti</option>
-										<option value="020">Presidente Commissione Sport</option>
-										<option value="021">Presidente Sottocommissione Fondazione Rotary</option>
-										<option value="022">Presidente Sottocommissione Sviluppo Effettivo</option>
-										<option value="023">Membro di commissione</option>
+										<option data-association="Rotary" value="010">Delegato Rotary per il Rotaract</option>
+										<option data-association="Rotaract" value="011">Presidente Commissione Azione Interna</option>
+										<option data-association="Rotaract" value="012">Delegato di zona</option>
+										<option data-association="Rotaract" value="013">Presidente Commissione Azione Interesse Pubblico</option>
+										<option data-association="Rotaract" value="014">Presidente Commissione Azione Internazionale</option>
+										<option data-association="Rotaract" value="015">Presidente Commissione Azione Nuove Generazioni</option>
+										<option data-association="Rotaract" value="016">Presidente Commissione Azione Professionale</option>
+										<option data-association="Rotaract" value="017">Presidente Commissione Comunicazione e Informatica</option>
+										<option data-association="Rotaract" value="018">Presidente Commissione Cultura</option>
+										<option data-association="Rotaract" value="019">Presidente Commissione Regolamento</option>
+										<option data-association="Rotaract" value="020">Presidente Commissione Revisione dei Conti</option>
+										<option data-association="Rotaract" value="021">Presidente Commissione Sport</option>
+										<option data-association="Rotaract" value="022">Presidente Sottocommissione Fondazione Rotary</option>
+										<option data-association="Rotaract" value="023">Presidente Sottocommissione Sviluppo Effettivo</option>
+										<option value="024">Membro di commissione</option>
 									</optgroup>
 									<optgroup label="Cariche di club">
 										<option value="100">Presidente</option>
@@ -237,20 +264,17 @@
 									</optgroup>
 								</select>
 							</label>
-							<div role="group">
+							<label>
+								A.R.
+								<input type="number" name="year" min="1900" max="2100" placeholder="A.R.">
+							</label>
+							<details>
+								<summary>Campi opzionali</summary>
 								<label>
-									Associazione
-									<select name="association">
-										<option value="1">Rotary</option>
-										<option value="2" selected>Rotaract</option>
-										<option value="3">Interact</option>
-									</select>
+									Anno Fondazione Club
+									<input type="number" name="year" min="1900" max="2100">
 								</label>
-								<label>
-									A.R.
-									<input type="number" name="year" min="1900" max="2100" placeholder="A.R.">
-								</label>
-							</div>
+							</details>
 							<button type="button" class="secondary outline remove">🗑️ Rimuovi</button>
 						</fieldset>
 					</template>
@@ -269,9 +293,9 @@
 	</main>
 	<footer style="text-align: center">
 		<small>
-			Credits: <a href="https://danieleambrosino.it" target="_blank">Daniele</a> (💻), Malvina e Grazia (🖼️)
+			Credits: <a href="https://danieleambrosino.it" target="_blank">Daniele Ambrosino</a>, <a href="https://linktr.ee/grazia_pachioli" target="_blank">Grazia Pachioli</a>, <a href="https://instagram.com/malvinarosseti" target="_blank">Malvina Rosseti</a>
 			<br>
-			Comm. Comunicazione e Informatica A.R. 2024/2025 ✌️
+			Comm. Comunicazione e Informatica A.R. 2024/2025
 			<br>
 			L'algoritmo considera come annata corrente l'A.R. <span id="currentYear"></span>
 		</small>
