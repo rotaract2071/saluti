@@ -170,19 +170,66 @@
 		}
 
 		/**
-		 * Roughly equivalent to a SQL ordering clause along the lines of
-		 * `ORDER BY roleSortOrder ASC, year ASC, associationSortOrder ASC`
-		 * with special handling for the current year case.
-		 *
 		 * @param {Person} a
 		 * @param {Person} b
 		 * @returns {number}
 		 */
 		function sortPeople(a, b) {
+			// Gestione particolare per direttivo distrettuale
+			if (a.roleSortOrder < 100 || b.roleSortOrder < 100) {
+				// Se solo uno dei due è nel direttivo distrettuale, quello ha la precedenza
+				if (a.roleSortOrder < 100 && a.roleSortOrder >= 100) return -1
+				if (b.roleSortOrder < 100 && a.roleSortOrder >= 100) return 1
+
+				// Entrambi sono nel direttivo distrettuale
+
+				// Se sono entrambi Governatori/Rappresentanti Distrettuali dell'anno corrente
+				if (a.roleSortOrder === 1 && b.roleSortOrder === 1 && a.year === currentYear && b.year === currentYear) {
+					// Privilegia il Rotary
+					if (a.associationSortOrder === 2) return -1
+					if (b.associationSortOrder === 2) return 1
+				}
+
+				// Gli in carica hanno sempre la precedenza
+				if (a.year === currentYear) return -1
+				if (b.year === currentYear) return 1
+
+				// Gli immediate past hanno la precedenza sugli altri past
+				if (a.year < currentYear && b.year < currentYear) {
+					if (a.year === currentYear - 1) return -1
+					if (b.year === currentYear - 1) return 1
+				}
+
+				// Altrimenti, ordina per anno crescente
+				// Gestisce implicitamente le regole
+				// 1. I past vanno ordinati per anzianità
+				// 2. Gli incoming hanno la precedenza sugli eletti
+				if (a.year !== b.year) return a.year - b.year
+
+				// Se dello stesso anno
+				// Se hanno cariche diverse, ordina per carica
+				if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
+
+				// A parità di anno e carica
+				// Altrimenti, ordina per associazione
+				return a.associationSortOrder - b.associationSortOrder
+			}
+
+			// Gestione standard
+
+			// Se hanno cariche diverse, ordina per carica
 			if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
+
+			// Se hanno la stessa carica
+			// Gli in carica hanno sempre la precedenza
 			if (a.year === currentYear) return -1
 			if (b.year === currentYear) return 1
+
+			// Se di anni diversi, ordina per anno crescente
 			if (a.year !== b.year) return a.year - b.year
+
+			// Se dello stesso anno
+			// Ordina per associazione
 			return a.associationSortOrder - b.associationSortOrder
 		}
 
@@ -219,8 +266,8 @@
 							<label>
 								Associazione
 								<select name="association">
-									<option value="1">Rotary</option>
-									<option value="2" selected>Rotaract</option>
+									<option value="1">Rotaract</option>
+									<option value="2">Rotary</option>
 									<option value="3">Interact</option>
 								</select>
 							</label>
@@ -229,38 +276,41 @@
 								<select name="role">
 									<optgroup label="Direttivo distrettuale">
 										<option data-association="Rotary" value="001">Governatore</option>
-										<option data-association="Rotaract" value="002">Rappresentante Distrettuale</option>
-										<option data-association="Interact" value="002">Rappresentante Distrettuale</option>
-										<option value="003">Segretario Distrettuale</option>
-										<option value="004">Tesoriere Distrettuale</option>
-										<option value="005">Prefetto Distrettuale</option>
-										<option data-association="Rotary" value="006">Assistente del Governatore</option>
+										<option data-association="Rotaract" value="001">Rappresentante Distrettuale</option>
+										<option data-association="Interact" value="001">Rappresentante Distrettuale</option>
+										<option value="003">Relatore</option>
+										<option value="004">Carica politica</option>
+										<option value="005">Carica militare</option>
+										<option value="006">Carica ecclesiastica</option>
+										<option value="007">Segretario Distrettuale</option>
+										<option value="008">Tesoriere Distrettuale</option>
+										<option value="009">Prefetto Distrettuale</option>
 									</optgroup>
 									<optgroup label="Esecutivo distrettuale">
-										<option data-association="Rotary" value="010">Delegato Rotary per il Rotaract</option>
-										<option data-association="Rotaract" value="011">Presidente Commissione Azione Interna</option>
-										<option data-association="Rotaract" value="012">Delegato di zona</option>
-										<option data-association="Rotaract" value="013">Presidente Commissione Azione Interesse Pubblico</option>
-										<option data-association="Rotaract" value="014">Presidente Commissione Azione Internazionale</option>
-										<option data-association="Rotaract" value="015">Presidente Commissione Azione Nuove Generazioni</option>
-										<option data-association="Rotaract" value="016">Presidente Commissione Azione Professionale</option>
-										<option data-association="Rotaract" value="017">Presidente Commissione Comunicazione e Informatica</option>
-										<option data-association="Rotaract" value="018">Presidente Commissione Cultura</option>
-										<option data-association="Rotaract" value="019">Presidente Commissione Regolamento</option>
-										<option data-association="Rotaract" value="020">Presidente Commissione Revisione dei Conti</option>
-										<option data-association="Rotaract" value="021">Presidente Commissione Sport</option>
-										<option data-association="Rotaract" value="022">Presidente Sottocommissione Fondazione Rotary</option>
-										<option data-association="Rotaract" value="023">Presidente Sottocommissione Sviluppo Effettivo</option>
-										<option value="024">Membro di commissione</option>
+										<option data-association="Rotary" value="101">Assistente del Governatore</option>
+										<option data-association="Rotaract" value="101">Presidente Commissione Azione Interna</option>
+										<option data-association="Rotaract" value="102">Presidente Commissione Azione Interesse Pubblico</option>
+										<option data-association="Rotaract" value="103">Presidente Commissione Azione Internazionale</option>
+										<option data-association="Rotaract" value="104">Presidente Commissione Azione Nuove Generazioni</option>
+										<option data-association="Rotaract" value="105">Presidente Commissione Azione Professionale</option>
+										<option data-association="Rotaract" value="106">Presidente Commissione Comunicazione e Informatica</option>
+										<option data-association="Rotaract" value="107">Presidente Commissione Cultura</option>
+										<option data-association="Rotaract" value="108">Presidente Commissione Regolamento</option>
+										<option data-association="Rotaract" value="109">Presidente Commissione Revisione dei Conti</option>
+										<option data-association="Rotaract" value="110">Presidente Commissione Sport</option>
+										<option data-association="Rotaract" value="111">Presidente Sottocommissione Fondazione Rotary</option>
+										<option data-association="Rotaract" value="112">Presidente Sottocommissione Sviluppo Effettivo</option>
+										<option data-association="Rotaract" value="113">Delegato di zona</option>
 									</optgroup>
 									<optgroup label="Cariche di club">
-										<option value="100">Presidente</option>
-										<option value="101">Vicepresidente</option>
-										<option value="103">Segretario</option>
-										<option value="104">Tesoriere</option>
-										<option value="105">Prefetto</option>
-										<option value="106">Consigliere</option>
-										<option value="107">Socio</option>
+										<option value="200">Presidente</option>
+										<option data-association="Rotary" value="201">Delegato Rotary per il Rotaract</option>
+										<option value="202">Vicepresidente</option>
+										<option value="203">Segretario</option>
+										<option value="204">Tesoriere</option>
+										<option value="205">Prefetto</option>
+										<option value="206">Consigliere</option>
+										<option value="207">Socio</option>
 									</optgroup>
 								</select>
 							</label>
