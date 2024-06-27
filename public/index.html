@@ -29,6 +29,11 @@
 			background: var(--pico-card-background-color);
 		}
 
+		.sticky {
+			position: sticky;
+			top: var(--pico-spacing);
+		}
+
 		@media print {
 			* {
 				background-color: white;
@@ -40,6 +45,10 @@
 			button,
 			footer {
 				display: none;
+			}
+
+			.sticky {
+				position: static;
 			}
 		}
 	</style>
@@ -306,7 +315,7 @@
 			</section>
 			<section>
 				<h2>Ordine dei saluti</h2>
-				<div style="position: sticky; top: var(--pico-spacing)">
+				<div class="sticky">
 					<button type="button" id="share">🔁 Condividi</button>
 					<button type="button" onclick="window.print()">🖨️ Stampa</button>
 					<ol></ol>
