@@ -107,7 +107,7 @@
 		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 		addButton.click()
 
-		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number}} Person */
+		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number, clubFoundationYear: number}} Person */
 
 		function requestFormSubmit() {
 			form.requestSubmit()
@@ -159,6 +159,7 @@
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
 			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
+			const clubFoundationYearInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-year"]'))
 
 			return {
 				name: nameInput.value,
@@ -167,6 +168,7 @@
 				roleSortOrder: parseInt(roleSelect.value),
 				associationSortOrder: parseInt(associationSelect.value),
 				year: parseInt(yearInput.value),
+				clubFoundationYear: parseInt(clubFoundationYearInput.value),
 			}
 		}
 
@@ -194,7 +196,8 @@
 				// Gli in carica hanno sempre la precedenza
 				if (a.year === currentYear) return -1
 				if (b.year === currentYear) return 1
-				// Gli immediate past hanno la precedenza
+
+				// Gli immediate past vengono subito dopo
 				if (a.year === currentYear - 1) return -1
 				if (b.year === currentYear - 1) return 1
 
@@ -204,15 +207,23 @@
 
 			// Hanno stessa carica e stesso anno
 
-			// Caso particolare: Governatore/R.D. dell'anno corrente
-			// In questo caso si dà precedenza al Rotary
-			if (a.roleSortOrder === 1 && a.year === currentYear) {
-				if (a.association === "Rotary") return -1
-				if (b.association === "Rotary") return 1
+			// Se associazioni diverse
+			if (a.association !== b.association) {
+				// Caso particolare: Governatore/R.D. dell'anno corrente
+				// In questo caso si dà precedenza al Rotary
+				if (a.roleSortOrder === 1 && a.year === currentYear) {
+					if (a.association === "Rotary") return -1
+					if (b.association === "Rotary") return 1
+				}
+	
+				// Ordina per associazione
+				return a.associationSortOrder - b.associationSortOrder
 			}
 
-			// Ordina per associazione
-			return a.associationSortOrder - b.associationSortOrder
+			// Hanno stessa carica, stesso anno e stessa associazione
+
+			// Ordina per anno di fondazione del club
+			return a.clubFoundationYear - b.clubFoundationYear
 		}
 
 		/**
@@ -304,7 +315,7 @@
 								<summary>Campi opzionali</summary>
 								<label>
 									Anno Fondazione Club
-									<input type="number" name="year" min="1900" max="2100">
+									<input type="number" name="club-foundation-year" min="1900" max="2100">
 								</label>
 							</details>
 							<button type="button" class="secondary outline remove">🗑️ Rimuovi</button>
