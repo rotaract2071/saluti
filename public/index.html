@@ -75,6 +75,8 @@
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
 			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
+			const clubSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="club"]'))
+			const clubFoundationDateInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-date"]'))
 			const removeButton = /** @type {HTMLButtonElement} */ (fieldset.querySelector("button.remove"))
 
 			nameInput.addEventListener("input", requestFormSubmit)
@@ -82,10 +84,14 @@
 			associationSelect.addEventListener("change", () => filterRoles(roleSelect.options, associationSelect.selectedOptions[0].innerText))
 			associationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", requestFormSubmit)
+			clubSelect.addEventListener("input", () => setClubFoundationDate(clubSelect, clubFoundationDateInput))
+			clubSelect.addEventListener("input", requestFormSubmit)
+			clubFoundationDateInput.addEventListener("input", requestFormSubmit)
 			removeButton.addEventListener("click", () => fieldset.remove())
 
 			yearInput.value = currentYear.toString()
 			filterRoles(roleSelect.options, associationSelect.selectedOptions[0].innerText)
+			setClubFoundationDate(clubSelect, clubFoundationDateInput)
 			form.append(fieldset)
 			nameInput.focus()
 		})
@@ -107,7 +113,7 @@
 		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 		addButton.click()
 
-		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number, clubFoundationYear: number}} Person */
+		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number, clubFoundationDate: Date}} Person */
 
 		function requestFormSubmit() {
 			form.requestSubmit()
@@ -127,6 +133,14 @@
 				.forEach((option) => option.style.removeProperty("display"))
 			options
 				.filter((option) => option.style.display === "")[0].selected = true
+		}
+
+		/**
+		 * @param {HTMLSelectElement} clubSelect
+		 * @param {HTMLInputElement} clubFoundationDateInput
+		 */
+		function setClubFoundationDate(clubSelect, clubFoundationDateInput) {
+			clubFoundationDateInput.value = clubSelect.value
 		}
 
 		function renderList() {
@@ -159,7 +173,7 @@
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
 			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
-			const clubFoundationYearInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-year"]'))
+			const clubFoundationDateInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-date"]'))
 
 			return {
 				name: nameInput.value,
@@ -168,7 +182,7 @@
 				roleSortOrder: parseInt(roleSelect.value),
 				associationSortOrder: parseInt(associationSelect.value),
 				year: parseInt(yearInput.value),
-				clubFoundationYear: parseInt(clubFoundationYearInput.value),
+				clubFoundationDate: new Date(clubFoundationDateInput.value),
 			}
 		}
 
@@ -215,15 +229,15 @@
 					if (a.association === "Rotary") return -1
 					if (b.association === "Rotary") return 1
 				}
-	
+
 				// Ordina per associazione
 				return a.associationSortOrder - b.associationSortOrder
 			}
 
 			// Hanno stessa carica, stesso anno e stessa associazione
 
-			// Ordina per anno di fondazione del club
-			return a.clubFoundationYear - b.clubFoundationYear
+			// Ordina per data di fondazione del club
+			return a.clubFoundationDate.getTime() - b.clubFoundationDate.getTime()
 		}
 
 		/**
@@ -314,9 +328,49 @@
 							<details>
 								<summary>Campi opzionali</summary>
 								<label>
-									Anno Fondazione Club
-									<input type="number" name="club-foundation-year" min="1900" max="2100">
+									Club
+									<select name="club">
+										<option value="1968-12-05">Arezzo</option>
+										<option value="1968-04-11">Carrara e Massa</option>
+										<option value="2004-05-28">Cascina</option>
+										<option value="2015-05-22">Casentino</option>
+										<option value="2011-06-16">Cecina Rosignano</option>
+										<option value="2014-06-08">Chianciano Chiusi Montepulciano</option>
+										<option value="1969-05-22">Empoli</option>
+										<option value="1994-06-13">Fiesole</option>
+										<option value="1968-03-18">Firenze</option>
+										<option value="2008-05-30">Firenze Bisenzio</option>
+										<option value="2005-06-27">Firenze Centenario</option>
+										<option value="2001-12-04">Firenze Certosa</option>
+										<option value="1968-09-07">Firenze Est</option>
+										<option value="1981-05-13">Firenze Nord</option>
+										<option value="2016-04-27">Firenze Sesto Calenzano</option>
+										<option value="1987-03-14">Firenze Sud</option>
+										<option value="1984-07-15">Follonica</option>
+										<option value="1987-05-25">Grosseto</option>
+										<option value="2014-07-04">Isola D'Elba</option>
+										<option value="1969-02-04">Lucca</option>
+										<option value="2016-11-18">Monte Argentario</option>
+										<option value="1982-05-12">Mugello</option>
+										<option value="2005-07-23">Piombino</option>
+										<option value="1970-03-07">Pisa</option>
+										<option value="1977-05-30">Pistoia Montecatini Terme</option>
+										<option value="1988-01-01">Pontedera</option>
+										<option value="1968-05-05">Prato</option>
+										<option value="2012-01-07">Rosignano Solvay</option>
+										<option value="2014-06-30">San Casciano Chianti</option>
+										<option value="1969-03-14">Siena</option>
+										<option value="2015-05-04">Valdarno Fiorentino</option>
+										<option value="2015-06-28">Valdarno Masaccio</option>
+										<option value="1968-05-26">Viareggio Versilia</option>
+										<option value="1984-04-02">Volterra</option>
+									</select>
 								</label>
+								<label>
+									Data di fondazione del Club
+									<input type="date" name="club-foundation-date">
+								</label>
+								<small>Specifica la data di fondazione del Club per dirimere eventuali spareggi.</small>
 							</details>
 							<button type="button" class="secondary outline remove">🗑️ Rimuovi</button>
 						</fieldset>
