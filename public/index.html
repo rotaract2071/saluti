@@ -175,62 +175,32 @@
 		 * @returns {number}
 		 */
 		function sortPeople(a, b) {
-			// Gestione particolare per direttivo distrettuale
-			if (a.roleSortOrder < 100 || b.roleSortOrder < 100) {
-				// Se solo uno dei due è nel direttivo distrettuale, quello ha la precedenza
-				if (a.roleSortOrder < 100 && a.roleSortOrder >= 100) return -1
-				if (b.roleSortOrder < 100 && a.roleSortOrder >= 100) return 1
+			// Se hanno cariche diverse, ordina per carica
+			if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
 
-				// Entrambi sono nel direttivo distrettuale
+			// Hanno la stessa carica
 
-				// Se sono entrambi Governatori/Rappresentanti Distrettuali dell'anno corrente
-				if (a.roleSortOrder === 1 && b.roleSortOrder === 1 && a.year === currentYear && b.year === currentYear) {
-					// Privilegia il Rotary
-					if (a.associationSortOrder === 2) return -1
-					if (b.associationSortOrder === 2) return 1
+			// Se hanno lo stesso anno
+			if (a.year === b.year) {
+				// Caso particolare: Governatore/R.D. dell'anno corrente
+				if (a.roleSortOrder === 1 && a.year === currentYear) {
+					if (a.association === "Rotary") return -1
+					if (b.association === "Rotary") return 1
 				}
-
-				// Gli in carica hanno sempre la precedenza
-				if (a.year === currentYear) return -1
-				if (b.year === currentYear) return 1
-
-				// Gli immediate past hanno la precedenza sugli altri past
-				if (a.year < currentYear && b.year < currentYear) {
-					if (a.year === currentYear - 1) return -1
-					if (b.year === currentYear - 1) return 1
-				}
-
-				// Altrimenti, ordina per anno crescente
-				// Gestisce implicitamente le regole
-				// 1. I past vanno ordinati per anzianità
-				// 2. Gli incoming hanno la precedenza sugli eletti
-				if (a.year !== b.year) return a.year - b.year
-
-				// Se dello stesso anno
-				// Se hanno cariche diverse, ordina per carica
-				if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
-
-				// A parità di anno e carica
 				// Altrimenti, ordina per associazione
 				return a.associationSortOrder - b.associationSortOrder
 			}
 
-			// Gestione standard
-
-			// Se hanno cariche diverse, ordina per carica
-			if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
-
-			// Se hanno la stessa carica
+			// Hanno anni diversi
 			// Gli in carica hanno sempre la precedenza
 			if (a.year === currentYear) return -1
 			if (b.year === currentYear) return 1
+			// Gli immediate past hanno la precedenza
+			if (a.year === currentYear - 1) return -1
+			if (b.year === currentYear - 1) return 1
 
-			// Se di anni diversi, ordina per anno crescente
-			if (a.year !== b.year) return a.year - b.year
-
-			// Se dello stesso anno
-			// Ordina per associazione
-			return a.associationSortOrder - b.associationSortOrder
+			// Altrimenti, ordina per anno crescente
+			return a.year - b.year
 		}
 
 		/**
