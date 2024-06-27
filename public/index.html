@@ -79,10 +79,13 @@
 			const clubFoundationDateInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-date"]'))
 			const removeButton = /** @type {HTMLButtonElement} */ (fieldset.querySelector("button.remove"))
 
+			const rolesOptions = roleSelect.options
+			const clubOptGroups = clubSelect.querySelectorAll("optgroup")
+
 			nameInput.addEventListener("input", requestFormSubmit)
 			roleSelect.addEventListener("change", requestFormSubmit)
-			associationSelect.addEventListener("change", () => filterRoles(roleSelect.options, associationSelect.selectedOptions[0].innerText))
-			associationSelect.addEventListener("change", () => filterClubs(Array.from(clubSelect.querySelectorAll("optgroup")), associationSelect.selectedOptions[0].innerText))
+			associationSelect.addEventListener("change", () => filterRoles(rolesOptions, getAssociationName(associationSelect)))
+			associationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getAssociationName(associationSelect)))
 			associationSelect.addEventListener("change", () => setClubFoundationDate(clubSelect, clubFoundationDateInput))
 			associationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", requestFormSubmit)
@@ -92,15 +95,15 @@
 			removeButton.addEventListener("click", () => fieldset.remove())
 
 			yearInput.value = currentYear.toString()
-			filterRoles(roleSelect.options, associationSelect.selectedOptions[0].innerText)
-			filterClubs(Array.from(clubSelect.querySelectorAll("optgroup")), associationSelect.selectedOptions[0].innerText)
+			filterRoles(rolesOptions, getAssociationName(associationSelect))
+			filterClubs(clubOptGroups, getAssociationName(associationSelect))
 			setClubFoundationDate(clubSelect, clubFoundationDateInput)
 			form.append(fieldset)
 			nameInput.focus()
 		})
 
 		shareButton.addEventListener("click", () => {
-			const text = listToText(ol)
+			const text = listItemsToText(ol.querySelectorAll("li"))
 			if (text === "") {
 				alert("Inserisci almeno un nominativo.")
 				return
@@ -123,31 +126,34 @@
 		}
 
 		/**
+		 * @param {HTMLSelectElement} associationSelect
+		 * @returns {string}
+		 */
+		function getAssociationName(associationSelect) {
+			return associationSelect.selectedOptions[0].innerText
+		}
+
+		/**
 		 * @param {HTMLOptionsCollection} optionsCollection
 		 * @param {string} association
 		 */
 		function filterRoles(optionsCollection, association) {
 			const options = Array.from(optionsCollection)
-			options.forEach((el) => {
-				el.style.display = "none"
-			})
-			options
-				.filter((option) => option.dataset.association === undefined || option.dataset.association === association)
-				.forEach((option) => option.style.removeProperty("display"))
-			options
-				.filter((option) => option.style.display === "")[0].selected = true
+			options.forEach((el) => el.style.display = "none")
+			options.filter((option) => option.dataset.association === undefined || option.dataset.association === association).forEach((option) => option.style.removeProperty("display"))
+			options.filter((option) => option.style.display === "")[0].selected = true
 		}
 
 		/**
-		 * @param {HTMLOptGroupElement[]} optGroups
+		 * @param {NodeListOf<HTMLOptGroupElement>} optGroupList
 		 * @param {string} association
 		 */
-		function filterClubs(optGroups, association) {
+		function filterClubs(optGroupList, association) {
+			const optGroups = Array.from(optGroupList)
 			optGroups.forEach((optGroup) => optGroup.style.display = "none")
 			optGroups.filter((optGroup) => optGroup.dataset.association === association).forEach((optGroup) => optGroup.style.removeProperty("display"))
 			const option = optGroups.filter((el) => el.style.display === "")[0].querySelector("option")
-			if (option === null) return
-			option.selected = true
+			if (option !== null) option.selected = true
 		}
 
 		/**
@@ -169,12 +175,12 @@
 		}
 
 		/**
-		 * @param {HTMLOListElement} ol
+		 * @param {NodeListOf<HTMLLIElement>} listItems
 		 * @returns {string}
 		 */
-		function listToText(ol) {
+		function listItemsToText(listItems) {
 			return Array
-				.from(ol.querySelectorAll("li"))
+				.from(listItems)
 				.map((li, index) => `${index + 1} - ${li.innerText}`)
 				.join("\n\n")
 		}
