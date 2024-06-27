@@ -180,27 +180,30 @@
 
 			// Hanno la stessa carica
 
-			// Se hanno lo stesso anno
-			if (a.year === b.year) {
-				// Caso particolare: Governatore/R.D. dell'anno corrente
-				if (a.roleSortOrder === 1 && a.year === currentYear) {
-					if (a.association === "Rotary") return -1
-					if (b.association === "Rotary") return 1
-				}
-				// Altrimenti, ordina per associazione
-				return a.associationSortOrder - b.associationSortOrder
+			// Se hanno anni diversi
+			if (a.year !== b.year) {
+				// Gli in carica hanno sempre la precedenza
+				if (a.year === currentYear) return -1
+				if (b.year === currentYear) return 1
+				// Gli immediate past hanno la precedenza
+				if (a.year === currentYear - 1) return -1
+				if (b.year === currentYear - 1) return 1
+
+				// Altrimenti, ordina per anno crescente
+				return a.year - b.year
 			}
 
-			// Hanno anni diversi
-			// Gli in carica hanno sempre la precedenza
-			if (a.year === currentYear) return -1
-			if (b.year === currentYear) return 1
-			// Gli immediate past hanno la precedenza
-			if (a.year === currentYear - 1) return -1
-			if (b.year === currentYear - 1) return 1
+			// Hanno stessa carica e stesso anno
 
-			// Altrimenti, ordina per anno crescente
-			return a.year - b.year
+			// Caso particolare: Governatore/R.D. dell'anno corrente
+			// In questo caso si dà precedenza al Rotary
+			if (a.roleSortOrder === 1 && a.year === currentYear) {
+				if (a.association === "Rotary") return -1
+				if (b.association === "Rotary") return 1
+			}
+
+			// Ordina per associazione
+			return a.associationSortOrder - b.associationSortOrder
 		}
 
 		/**
