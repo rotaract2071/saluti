@@ -165,14 +165,21 @@
 		}
 
 		function renderList() {
-			ol.replaceChildren(...Array
-				.from(form.querySelectorAll("fieldset"))
+			ol.replaceChildren(...fieldsetsToListItems(form.querySelectorAll("fieldset")))
+		}
+
+		/**
+		 * @param {NodeListOf<HTMLFieldSetElement>} fieldsets 
+		 * @returns {HTMLLIElement[]}
+		 */
+		function fieldsetsToListItems(fieldsets) {
+			return Array
+				.from(fieldsets)
 				.map(fieldsetToPerson)
 				.map(enhanceRoleName)
 				.filter(personHasNameAndYear)
 				.sort(sortPeople)
 				.map(personToListItem)
-			)
 		}
 
 		/**
