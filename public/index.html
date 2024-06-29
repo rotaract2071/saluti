@@ -189,7 +189,7 @@
 		function listItemsToText(listItems) {
 			return Array
 				.from(listItems)
-				.map((li, index) => `${index + 1} - ${li.innerText}`)
+				.map((listItem, index) => `${index + 1} - ${listItem.innerText}`)
 				.join("\n\n")
 		}
 
