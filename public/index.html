@@ -82,16 +82,16 @@
 
 			const rolesOptions = roleSelect.options
 			const clubOptGroups = clubSelect.querySelectorAll("optgroup")
-			const noneClubOption = /** @type {HTMLOptionElement} */ (clubSelect.querySelector('option[value=""][disabled]'))
+			const noneClubOption = /** @type {HTMLOptionElement} */ (clubSelect.querySelector("option.none"))
 
 			nameInput.addEventListener("input", requestFormSubmit)
 			roleSelect.addEventListener("change", requestFormSubmit)
 			organizationSelect.addEventListener("change", () => filterRoles(rolesOptions, getSelectedOptionText(organizationSelect)))
 			organizationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect), noneClubOption))
-			organizationSelect.addEventListener("change", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect))
+			organizationSelect.addEventListener("change", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption))
 			organizationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", requestFormSubmit)
-			clubSelect.addEventListener("input", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect))
+			clubSelect.addEventListener("input", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption))
 			clubSelect.addEventListener("input", requestFormSubmit)
 			clubFoundationDateInput.addEventListener("input", requestFormSubmit)
 			removeButton.addEventListener("click", () => fieldset.remove())
@@ -159,10 +159,11 @@
 		/**
 		 * @param {HTMLInputElement} clubFoundationDateInput
 		 * @param {HTMLSelectElement} clubSelect
+		 * @param {HTMLOptionElement} noneClubOption
 		 */
-		function updateClubFoundationDate(clubFoundationDateInput, clubSelect) {
+		function updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption) {
 			clubFoundationDateInput.value = clubSelect.value
-			clubFoundationDateInput.disabled = clubSelect.selectedOptions[0].disabled || clubSelect.value !== ""
+			clubFoundationDateInput.disabled = clubSelect.value !== "" || noneClubOption.isSameNode(clubSelect.selectedOptions[0])
 		}
 
 		function renderList() {
@@ -384,7 +385,7 @@
 								<label>
 									Club
 									<select name="club">
-										<option value="" disabled>Nessuno</option>
+										<option value="" class="none">Nessuno</option>
 										<option value="">Altro</option>
 										<optgroup data-organization="Rotaract" label="Rotaract Club Distretto 2071">
 											<option value="1968-12-05">Arezzo</option>
