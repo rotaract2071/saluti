@@ -71,6 +71,7 @@
 
 		addButton.addEventListener("click", () => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
+
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
 			const organizationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="organization"]'))
@@ -81,23 +82,22 @@
 
 			const rolesOptions = roleSelect.options
 			const clubOptGroups = clubSelect.querySelectorAll("optgroup")
+			const noneClubOption = /** @type {HTMLOptionElement} */ (clubSelect.querySelector('option[value=""][disabled]'))
 
 			nameInput.addEventListener("input", requestFormSubmit)
 			roleSelect.addEventListener("change", requestFormSubmit)
 			organizationSelect.addEventListener("change", () => filterRoles(rolesOptions, getSelectedOptionText(organizationSelect)))
-			organizationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect)))
-			organizationSelect.addEventListener("change", () => setClubFoundationDate(clubSelect, clubFoundationDateInput))
+			organizationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect), noneClubOption))
+			organizationSelect.addEventListener("change", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect))
 			organizationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", requestFormSubmit)
-			clubSelect.addEventListener("input", () => setClubFoundationDate(clubSelect, clubFoundationDateInput))
+			clubSelect.addEventListener("input", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect))
 			clubSelect.addEventListener("input", requestFormSubmit)
 			clubFoundationDateInput.addEventListener("input", requestFormSubmit)
 			removeButton.addEventListener("click", () => fieldset.remove())
 
 			yearInput.value = currentYear.toString()
-			filterRoles(rolesOptions, getSelectedOptionText(organizationSelect))
-			filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect))
-			setClubFoundationDate(clubSelect, clubFoundationDateInput)
+			organizationSelect.dispatchEvent(new Event("change"))
 			form.append(fieldset)
 			nameInput.focus()
 		})
@@ -119,7 +119,7 @@
 		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 		addButton.click()
 
-		/** @typedef {{name: string, role: string, organization: string, roleSortOrder: number, organizationSortOrder: number, year: number, clubFoundationDate: Date}} Person */
+		/** @typedef {{name: string, organization: string, organizationSortOrder: number, role: string, roleSortOrder: number, year: number, clubFoundationDate: Date}} Person */
 
 		function requestFormSubmit() {
 			form.requestSubmit()
@@ -139,7 +139,7 @@
 		 */
 		function filterRoles(optionsCollection, organization) {
 			const options = Array.from(optionsCollection)
-			options.forEach((el) => el.style.display = "none")
+			options.forEach((option) => option.style.display = "none")
 			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => option.style.removeProperty("display"))
 			options.filter((option) => option.style.display === "")[0].selected = true
 		}
@@ -147,21 +147,23 @@
 		/**
 		 * @param {NodeListOf<HTMLOptGroupElement>} optGroupList
 		 * @param {string} organization
+		 * @param {HTMLOptionElement} noneClubOption
 		 */
-		function filterClubs(optGroupList, organization) {
+		function filterClubs(optGroupList, organization, noneClubOption) {
 			const optGroups = Array.from(optGroupList)
 			optGroups.forEach((optGroup) => optGroup.style.display = "none")
 			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => optGroup.style.removeProperty("display"))
-			const option = optGroups.filter((el) => el.style.display === "")[0].querySelector("option")
-			if (option !== null) option.selected = true
+			const option = optGroups.filter((optGroup) => optGroup.style.display === "")[0]?.querySelector("option");
+			(option || noneClubOption).selected = true
 		}
 
 		/**
-		 * @param {HTMLSelectElement} clubSelect
 		 * @param {HTMLInputElement} clubFoundationDateInput
+		 * @param {HTMLSelectElement} clubSelect
 		 */
-		function setClubFoundationDate(clubSelect, clubFoundationDateInput) {
+		function updateClubFoundationDate(clubFoundationDateInput, clubSelect) {
 			clubFoundationDateInput.value = clubSelect.value
+			clubFoundationDateInput.disabled = clubSelect.selectedOptions[0].disabled
 		}
 
 		function renderList() {
@@ -178,7 +180,7 @@
 				.map(fieldsetToPerson)
 				.map(enhanceRoleName)
 				.filter(personHasNameAndYear)
-				.sort(sortPeople)
+				.sort(comparePeople)
 				.map(personToListItem)
 		}
 
@@ -206,10 +208,10 @@
 
 			return {
 				name: nameInput.value,
-				role: getSelectedOptionText(roleSelect),
 				organization: getSelectedOptionText(organizationSelect),
-				roleSortOrder: parseInt(roleSelect.value),
 				organizationSortOrder: parseInt(organizationSelect.value),
+				role: getSelectedOptionText(roleSelect),
+				roleSortOrder: parseInt(roleSelect.value),
 				year: parseInt(yearInput.value),
 				clubFoundationDate: new Date(clubFoundationDateInput.value),
 			}
@@ -247,7 +249,7 @@
 		 * @param {Person} b
 		 * @returns {number}
 		 */
-		function sortPeople(a, b) {
+		function comparePeople(a, b) {
 			// Se cariche diverse, ordina per carica
 			if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
 
@@ -297,8 +299,7 @@
 			const b = document.createElement("b")
 			b.innerText = person.name
 			li.append(b)
-			const role = person.role
-			li.innerHTML += `<br><small>${role} ${person.organization}<br>A.R. ${person.year}/${person.year + 1}</small>`
+			li.innerHTML += `<br><small>${person.role} ${person.organization}<br>A.R. ${person.year}/${person.year + 1}</small>`
 			return li
 		}
 	</script>
@@ -382,7 +383,9 @@
 								<label>
 									Club
 									<select name="club">
-										<optgroup data-organization="Rotaract" label="Rotaract Club">
+										<option value="" disabled>Nessuno</option>
+										<option value="">Altro</option>
+										<optgroup data-organization="Rotaract" label="Rotaract Club Distretto 2071">
 											<option value="1968-12-05">Arezzo</option>
 											<option value="1968-04-11">Carrara e Massa</option>
 											<option value="2004-05-28">Cascina</option>
@@ -426,7 +429,7 @@
 											<option value="1969-05-26">Viareggio Versilia</option>
 											<option value="1982-04-01">Volterra</option>
 										</optgroup>
-										<optgroup data-organization="Rotary" label="Rotary Club">
+										<optgroup data-organization="Rotary" label="Rotary Club Distretto 2071">
 											<option value="1997-05-29">Alta Valdelsa</option>
 											<option value="2023-04-19">Antiche Valli del Serchio</option>
 											<option value="1949-01-18">Arezzo</option>
