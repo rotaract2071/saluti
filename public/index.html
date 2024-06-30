@@ -162,7 +162,7 @@
 		 */
 		function updateClubFoundationDate(clubFoundationDateInput, clubSelect) {
 			clubFoundationDateInput.value = clubSelect.value
-			clubFoundationDateInput.disabled = clubSelect.selectedOptions[0].disabled
+			clubFoundationDateInput.disabled = clubSelect.selectedOptions[0].disabled || clubSelect.value !== ""
 		}
 
 		function renderList() {
@@ -179,7 +179,7 @@
 				.map(fieldsetToPerson)
 				.map(detailTemporallyRoleOf)
 				.filter(personHasNameAndYear)
-				.sort(comparePeople)
+				.sort(compare)
 				.map(personToListItem)
 		}
 
@@ -250,7 +250,7 @@
 		 * @param {Person} b
 		 * @returns {number}
 		 */
-		function comparePeople(a, b) {
+		function compare(a, b) {
 			// Se cariche diverse, ordina per carica
 			if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
 
