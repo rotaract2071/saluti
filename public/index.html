@@ -73,7 +73,7 @@
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
-			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
+			const organizationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="organization"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
 			const clubSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="club"]'))
 			const clubFoundationDateInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-date"]'))
@@ -84,10 +84,10 @@
 
 			nameInput.addEventListener("input", requestFormSubmit)
 			roleSelect.addEventListener("change", requestFormSubmit)
-			associationSelect.addEventListener("change", () => filterRoles(rolesOptions, getAssociationName(associationSelect)))
-			associationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getAssociationName(associationSelect)))
-			associationSelect.addEventListener("change", () => setClubFoundationDate(clubSelect, clubFoundationDateInput))
-			associationSelect.addEventListener("change", requestFormSubmit)
+			organizationSelect.addEventListener("change", () => filterRoles(rolesOptions, getSelectedOptionText(organizationSelect)))
+			organizationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect)))
+			organizationSelect.addEventListener("change", () => setClubFoundationDate(clubSelect, clubFoundationDateInput))
+			organizationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", requestFormSubmit)
 			clubSelect.addEventListener("input", () => setClubFoundationDate(clubSelect, clubFoundationDateInput))
 			clubSelect.addEventListener("input", requestFormSubmit)
@@ -95,8 +95,8 @@
 			removeButton.addEventListener("click", () => fieldset.remove())
 
 			yearInput.value = currentYear.toString()
-			filterRoles(rolesOptions, getAssociationName(associationSelect))
-			filterClubs(clubOptGroups, getAssociationName(associationSelect))
+			filterRoles(rolesOptions, getSelectedOptionText(organizationSelect))
+			filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect))
 			setClubFoundationDate(clubSelect, clubFoundationDateInput)
 			form.append(fieldset)
 			nameInput.focus()
@@ -119,39 +119,39 @@
 		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
 		addButton.click()
 
-		/** @typedef {{name: string, role: string, association: string, roleSortOrder: number, associationSortOrder: number, year: number, clubFoundationDate: Date}} Person */
+		/** @typedef {{name: string, role: string, organization: string, roleSortOrder: number, organizationSortOrder: number, year: number, clubFoundationDate: Date}} Person */
 
 		function requestFormSubmit() {
 			form.requestSubmit()
 		}
 
 		/**
-		 * @param {HTMLSelectElement} associationSelect
+		 * @param {HTMLSelectElement} select
 		 * @returns {string}
 		 */
-		function getAssociationName(associationSelect) {
-			return associationSelect.selectedOptions[0].innerText
+		function getSelectedOptionText(select) {
+			return select.selectedOptions[0].innerText
 		}
 
 		/**
 		 * @param {HTMLOptionsCollection} optionsCollection
-		 * @param {string} association
+		 * @param {string} organization
 		 */
-		function filterRoles(optionsCollection, association) {
+		function filterRoles(optionsCollection, organization) {
 			const options = Array.from(optionsCollection)
 			options.forEach((el) => el.style.display = "none")
-			options.filter((option) => option.dataset.association === undefined || option.dataset.association === association).forEach((option) => option.style.removeProperty("display"))
+			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => option.style.removeProperty("display"))
 			options.filter((option) => option.style.display === "")[0].selected = true
 		}
 
 		/**
 		 * @param {NodeListOf<HTMLOptGroupElement>} optGroupList
-		 * @param {string} association
+		 * @param {string} organization
 		 */
-		function filterClubs(optGroupList, association) {
+		function filterClubs(optGroupList, organization) {
 			const optGroups = Array.from(optGroupList)
 			optGroups.forEach((optGroup) => optGroup.style.display = "none")
-			optGroups.filter((optGroup) => optGroup.dataset.association === association).forEach((optGroup) => optGroup.style.removeProperty("display"))
+			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => optGroup.style.removeProperty("display"))
 			const option = optGroups.filter((el) => el.style.display === "")[0].querySelector("option")
 			if (option !== null) option.selected = true
 		}
@@ -200,16 +200,16 @@
 		function fieldsetToPerson(fieldset) {
 			const nameInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="name"]'))
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
-			const associationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="association"]'))
+			const organizationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="organization"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
 			const clubFoundationDateInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="club-foundation-date"]'))
 
 			return {
 				name: nameInput.value,
-				role: roleSelect.selectedOptions[0].innerText,
-				association: associationSelect.selectedOptions[0].innerText,
+				role: getSelectedOptionText(roleSelect),
+				organization: getSelectedOptionText(organizationSelect),
 				roleSortOrder: parseInt(roleSelect.value),
-				associationSortOrder: parseInt(associationSelect.value),
+				organizationSortOrder: parseInt(organizationSelect.value),
 				year: parseInt(yearInput.value),
 				clubFoundationDate: new Date(clubFoundationDateInput.value),
 			}
@@ -248,12 +248,12 @@
 		 * @returns {number}
 		 */
 		function sortPeople(a, b) {
-			// Se hanno cariche diverse, ordina per carica
+			// Se cariche diverse, ordina per carica
 			if (a.roleSortOrder !== b.roleSortOrder) return a.roleSortOrder - b.roleSortOrder
 
 			// Hanno la stessa carica
 
-			// Se hanno anni diversi
+			// Se anni diversi
 			if (a.year !== b.year) {
 				// Gli in carica hanno sempre la precedenza
 				if (a.year === currentYear) return -1
@@ -270,16 +270,16 @@
 			// Hanno stessa carica e stesso anno
 
 			// Se associazioni diverse
-			if (a.association !== b.association) {
+			if (a.organization !== b.organization) {
 				// Caso particolare: Governatore/R.D. dell'anno corrente
 				// In questo caso si dà precedenza al Rotary
 				if (a.roleSortOrder === 1 && a.year === currentYear) {
-					if (a.association === "Rotary") return -1
-					if (b.association === "Rotary") return 1
+					if (a.organization === "Rotary") return -1
+					if (b.organization === "Rotary") return 1
 				}
 
 				// Ordina per associazione
-				return a.associationSortOrder - b.associationSortOrder
+				return a.organizationSortOrder - b.organizationSortOrder
 			}
 
 			// Hanno stessa carica, stesso anno e stessa associazione
@@ -298,7 +298,7 @@
 			b.innerText = person.name
 			li.append(b)
 			const role = person.role
-			li.innerHTML += `<br><small>${role} ${person.association}<br>A.R. ${person.year}/${person.year + 1}</small>`
+			li.innerHTML += `<br><small>${role} ${person.organization}<br>A.R. ${person.year}/${person.year + 1}</small>`
 			return li
 		}
 	</script>
@@ -320,7 +320,7 @@
 							</label>
 							<label>
 								Associazione
-								<select name="association">
+								<select name="organization">
 									<option value="1">Rotaract</option>
 									<option value="2">Rotary</option>
 									<option value="3">Interact</option>
@@ -329,11 +329,11 @@
 							<label>
 								Carica
 								<select name="role">
-									<optgroup label="Direttivo distrettuale e cariche esterne">
-										<option data-association="Rotary" value="001">Governatore</option>
-										<option data-association="Rotaract" value="001">Rappresentante Distrettuale</option>
-										<option data-association="Interact" value="001">Rappresentante Distrettuale</option>
-										<option data-association="Rotary" value="002">Vicegovernatore</option>
+									<optgroup label="Direttivo distrettuale">
+										<option data-organization="Rotary" value="001">Governatore</option>
+										<option data-organization="Rotaract" value="001">Rappresentante Distrettuale</option>
+										<option data-organization="Interact" value="001">Rappresentante Distrettuale</option>
+										<option data-organization="Rotary" value="002">Vicegovernatore</option>
 										<option value="003">Relatore</option>
 										<option value="004">Carica politica</option>
 										<option value="005">Carica militare</option>
@@ -343,27 +343,27 @@
 										<option value="009">Prefetto Distrettuale</option>
 									</optgroup>
 									<optgroup label="Esecutivo distrettuale">
-										<option data-association="Rotary" value="100">Assistente del Governatore</option>
-										<option data-association="Rotaract" value="110">Presidente Commissione Azione Interna</option>
-										<option data-association="Rotaract" value="111">Presidente Commissione Azione Interesse Pubblico</option>
-										<option data-association="Rotaract" value="112">Presidente Commissione Azione Internazionale</option>
-										<option data-association="Rotaract" value="113">Presidente Commissione Azione Nuove Generazioni</option>
-										<option data-association="Rotaract" value="114">Presidente Commissione Azione Professionale</option>
-										<option data-association="Rotary" value="120">Presidente Commissione Via d'Azione</option>
-										<option data-association="Rotaract" value="130">Presidente Commissione Comunicazione e Informatica</option>
-										<option data-association="Rotaract" value="131">Presidente Commissione Cultura</option>
-										<option data-association="Rotaract" value="132">Presidente Commissione Regolamento</option>
-										<option data-association="Rotaract" value="133">Presidente Commissione Revisione dei Conti</option>
-										<option data-association="Rotaract" value="134">Presidente Commissione Sport</option>
-										<option data-association="Rotary" value="140">Presidente Commissione</option>
-										<option data-association="Rotaract" value="150">Presidente Sottocommissione Fondazione Rotary</option>
-										<option data-association="Rotaract" value="151">Presidente Sottocommissione Sviluppo Effettivo</option>
-										<option data-association="Rotary" value="160">Presidente Sottocommissione</option>
-										<option data-association="Rotaract" value="170">Delegato di zona</option>
+										<option data-organization="Rotary" value="100">Assistente del Governatore</option>
+										<option data-organization="Rotaract" value="110">Presidente Commissione Azione Interna</option>
+										<option data-organization="Rotaract" value="111">Presidente Commissione Azione Interesse Pubblico</option>
+										<option data-organization="Rotaract" value="112">Presidente Commissione Azione Internazionale</option>
+										<option data-organization="Rotaract" value="113">Presidente Commissione Azione Nuove Generazioni</option>
+										<option data-organization="Rotaract" value="114">Presidente Commissione Azione Professionale</option>
+										<option data-organization="Rotary" value="120">Presidente Commissione Via d'Azione</option>
+										<option data-organization="Rotaract" value="130">Presidente Commissione Comunicazione e Informatica</option>
+										<option data-organization="Rotaract" value="131">Presidente Commissione Cultura</option>
+										<option data-organization="Rotaract" value="132">Presidente Commissione Regolamento</option>
+										<option data-organization="Rotaract" value="133">Presidente Commissione Revisione dei Conti</option>
+										<option data-organization="Rotaract" value="134">Presidente Commissione Sport</option>
+										<option data-organization="Rotary" value="140">Presidente Commissione</option>
+										<option data-organization="Rotaract" value="150">Presidente Sottocommissione Fondazione Rotary</option>
+										<option data-organization="Rotaract" value="151">Presidente Sottocommissione Sviluppo Effettivo</option>
+										<option data-organization="Rotary" value="160">Presidente Sottocommissione</option>
+										<option data-organization="Rotaract" value="170">Delegato di zona</option>
 									</optgroup>
 									<optgroup label="Cariche di club">
 										<option value="200">Presidente</option>
-										<option data-association="Rotary" value="201">Delegato Rotary per il Rotaract</option>
+										<option data-organization="Rotary" value="201">Delegato Rotary per il Rotaract</option>
 										<option value="202">Vicepresidente</option>
 										<option value="203">Segretario</option>
 										<option value="204">Tesoriere</option>
@@ -382,7 +382,7 @@
 								<label>
 									Club
 									<select name="club">
-										<optgroup data-association="Rotaract" label="Rotaract Club">
+										<optgroup data-organization="Rotaract" label="Rotaract Club">
 											<option value="1968-12-05">Arezzo</option>
 											<option value="1968-04-11">Carrara e Massa</option>
 											<option value="2004-05-28">Cascina</option>
@@ -426,7 +426,7 @@
 											<option value="1969-05-26">Viareggio Versilia</option>
 											<option value="1982-04-01">Volterra</option>
 										</optgroup>
-										<optgroup data-association="Rotary" label="Rotary Club">
+										<optgroup data-organization="Rotary" label="Rotary Club">
 											<option value="1997-05-29">Alta Valdelsa</option>
 											<option value="2023-04-19">Antiche Valli del Serchio</option>
 											<option value="1949-01-18">Arezzo</option>
