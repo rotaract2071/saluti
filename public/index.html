@@ -63,7 +63,7 @@
 		const currentYearSpan = /** @type {HTMLSpanElement} */ (document.getElementById("currentYear"))
 
 		const now = new Date()
-		const currentYear = now.getFullYear() - (now.getMonth() <= 6 ? 1 : 0)
+		const currentYear = now.getFullYear() - (now.getMonth() < 6 ? 1 : 0)
 
 		form.addEventListener("submit", (e) => e.preventDefault())
 		form.addEventListener("submit", renderList)
