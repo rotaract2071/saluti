@@ -140,9 +140,9 @@
 		 */
 		function filterRoles(optionsCollection, organization) {
 			const options = Array.from(optionsCollection)
-			options.forEach((option) => option.style.display = "none")
-			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => option.style.removeProperty("display"))
-			options.filter((option) => option.style.display === "")[0].selected = true
+			options.forEach((option) => option.toggleAttribute("hidden", true))
+			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => option.toggleAttribute("hidden", false))
+			options.filter((option) => !option.hasAttribute("hidden"))[0].selected = true
 		}
 
 		/**
@@ -152,8 +152,8 @@
 		 */
 		function filterClubs(optGroupList, organization, noneClubOption) {
 			const optGroups = Array.from(optGroupList)
-			optGroups.forEach((optGroup) => optGroup.style.display = "none")
-			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => optGroup.style.removeProperty("display"))
+			optGroups.forEach((optGroup) => optGroup.toggleAttribute("hidden", true))
+			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => optGroup.toggleAttribute("hidden", false))
 			noneClubOption.selected = true
 		}
 
