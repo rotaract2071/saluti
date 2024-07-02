@@ -140,8 +140,8 @@
 		 */
 		function filterRoles(optionsCollection, organization) {
 			const options = Array.from(optionsCollection)
-			options.forEach((option) => hide(option))
-			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => show(option))
+			options.forEach(hide)
+			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach(show)
 			options.filter((option) => !option.hidden)[0].selected = true
 		}
 
@@ -154,11 +154,11 @@
 			const optGroups = Array.from(optGroupList)
 			optGroups.forEach((optGroup) => {
 				hide(optGroup)
-				optGroup.querySelectorAll("option").forEach((option) => hide(option))
+				optGroup.querySelectorAll("option").forEach(hide)
 			})
 			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => {
 				show(optGroup)
-				optGroup.querySelectorAll("option").forEach((option) => show(option))
+				optGroup.querySelectorAll("option").forEach(show)
 			})
 			noneClubOption.selected = true
 		}
