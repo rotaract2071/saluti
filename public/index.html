@@ -140,8 +140,8 @@
 		 */
 		function filterRoles(optionsCollection, organization) {
 			const options = Array.from(optionsCollection)
-			options.forEach((option) => { option.hidden = true; option.disabled = true })
-			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => { option.hidden = false; option.disabled = false })
+			options.forEach((option) => { hide(option) })
+			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => { show(option) })
 			options.filter((option) => !option.hidden)[0].selected = true
 		}
 
@@ -152,9 +152,38 @@
 		 */
 		function filterClubs(optGroupList, organization, noneClubOption) {
 			const optGroups = Array.from(optGroupList)
-			optGroups.forEach((optGroup) => { optGroup.hidden = true; optGroup.disabled = true })
-			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => { optGroup.hidden = false; optGroup.disabled = false })
+			optGroups.forEach((optGroup) => {
+				hide(optGroup)
+				optGroup.querySelectorAll("option").forEach((option) => hide(option))
+			})
+			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => {
+				show(optGroup)
+				optGroup.querySelectorAll("option").forEach((option) => show(option))
+			})
 			noneClubOption.selected = true
+		}
+
+		/**
+		 * @param {HTMLOptionElement|HTMLOptGroupElement} element
+		 */
+		function show(element) {
+			toggleVisibility(element, true)
+		}
+
+		/**
+		 * @param {HTMLOptionElement|HTMLOptGroupElement} element
+		 */
+		function hide(element) {
+			toggleVisibility(element, false)
+		}
+
+		/**
+		 * @param {HTMLOptionElement|HTMLOptGroupElement} element
+		 * @param {boolean} visible
+		 */
+		function toggleVisibility(element, visible) {
+			element.hidden = !visible
+			element.disabled = !visible
 		}
 
 		/**
