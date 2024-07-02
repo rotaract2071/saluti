@@ -140,8 +140,8 @@
 		 */
 		function filterRoles(optionsCollection, organization) {
 			const options = Array.from(optionsCollection)
-			options.forEach((option) => { hide(option) })
-			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => { show(option) })
+			options.forEach((option) => hide(option))
+			options.filter((option) => option.dataset.organization === undefined || option.dataset.organization === organization).forEach((option) => show(option))
 			options.filter((option) => !option.hidden)[0].selected = true
 		}
 
