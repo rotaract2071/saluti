@@ -251,25 +251,6 @@
 
 		/**
 		 * @param {Person} person
-		 * @returns {Person}
-		 */
-		function detailTemporallyRoleOf(person) {
-			if (person.year < currentYear - 1) {
-				person.role = `Past ${person.role}`
-			} else if (person.year === currentYear - 1) {
-				person.role = `Immediate Past ${person.role}`
-			} else if (person.year === currentYear + 1) {
-				person.role = `${person.role} Incoming`
-			} else if (person.year === currentYear + 2) {
-				person.role = `${person.role} Eletto`
-			} else if (person.year === currentYear + 3) {
-				person.role = `${person.role} Nominato`
-			}
-			return person
-		}
-
-		/**
-		 * @param {Person} person
 		 * @returns {boolean}
 		 */
 		function personHasNameAndYear({ name, year }) {
@@ -320,6 +301,25 @@
 
 			// Ordina per data di fondazione del club
 			return a.clubFoundationDate.getTime() - b.clubFoundationDate.getTime()
+		}
+
+		/**
+		 * @param {Person} person
+		 * @returns {Person}
+		 */
+		function detailTemporallyRoleOf(person) {
+			if (person.year < currentYear - 1) {
+				person.role = `Past ${person.role}`
+			} else if (person.year === currentYear - 1) {
+				person.role = `Immediate Past ${person.role}`
+			} else if (person.year === currentYear + 1) {
+				person.role = `${person.role} Incoming`
+			} else if (person.year === currentYear + 2) {
+				person.role = `${person.role} Eletto`
+			} else if (person.year === currentYear + 3) {
+				person.role = `${person.role} Nominato`
+			}
+			return person
 		}
 
 		/**
