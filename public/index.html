@@ -208,9 +208,9 @@
 			return Array
 				.from(fieldsets)
 				.map(fieldsetToPerson)
-				.map(detailTemporallyRoleOf)
 				.filter(personHasNameAndYear)
 				.sort(compare)
+				.map(detailTemporallyRoleOf)
 				.map(personToListItem)
 		}
 
