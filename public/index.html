@@ -62,18 +62,24 @@
 		// @ts-check
 
 		const form = /** @type {HTMLFormElement} */ (document.querySelector("form"))
+		const currentYearInput = /** @type {HTMLInputElement} */ (form.querySelector('input[name="current-year"]'))
+		const currentYearPlusOneSpan = /** @type {HTMLSpanElement} */ (document.getElementById("current-year-plus-one"))
 		const template = /** @type {HTMLTemplateElement} */ (document.querySelector("template"))
 		const addButton = /** @type {HTMLButtonElement} */ (document.getElementById("add"))
 		const shareButton = /** @type {HTMLButtonElement} */ (document.getElementById("share"))
 		const ol = /** @type {HTMLOListElement} */ (document.querySelector("ol"))
-		const currentYearSpan = /** @type {HTMLSpanElement} */ (document.getElementById("currentYear"))
-
-		const now = new Date()
-		const currentYear = now.getFullYear() - (now.getMonth() < 6 ? 1 : 0)
 
 		form.addEventListener("submit", (e) => e.preventDefault())
 		form.addEventListener("submit", renderList)
 		new MutationObserver(renderList).observe(form, { childList: true })
+
+		const now = new Date()
+		let currentYear = now.getFullYear() - (now.getMonth() < 6 ? 1 : 0)
+		currentYearInput.addEventListener("input", () => currentYear = parseInt(currentYearInput.value))
+		currentYearInput.addEventListener("input", () => currentYearPlusOneSpan.innerText = (currentYear + 1).toString())
+		currentYearInput.addEventListener("input", requestFormSubmit)
+		currentYearInput.value = currentYear.toString()
+		currentYearInput.dispatchEvent(new Event("input"))
 
 		addButton.addEventListener("click", () => {
 			const fieldset = /** @type {HTMLFieldSetElement} */ (/** @type {HTMLFieldSetElement} */ (template.content.firstElementChild).cloneNode(true))
@@ -82,6 +88,7 @@
 			const roleSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="role"]'))
 			const organizationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="organization"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
+			const yearPlusOneSpan = /** @type {HTMLSpanElement} */ (fieldset.querySelector("span.year-plus-one"))
 			const clubSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="club"]'))
 			const clubFoundationDateInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-date"]'))
 			const removeButton = /** @type {HTMLButtonElement} */ (fieldset.querySelector("button.remove"))
@@ -96,6 +103,7 @@
 			organizationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect), noneClubOption))
 			organizationSelect.addEventListener("change", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption))
 			organizationSelect.addEventListener("change", requestFormSubmit)
+			yearInput.addEventListener("input", () => yearPlusOneSpan.innerText = (parseInt(yearInput.value) + 1).toString())
 			yearInput.addEventListener("input", requestFormSubmit)
 			clubSelect.addEventListener("input", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption))
 			clubSelect.addEventListener("input", requestFormSubmit)
@@ -103,10 +111,12 @@
 			removeButton.addEventListener("click", () => fieldset.remove())
 
 			yearInput.value = currentYear.toString()
+			yearInput.dispatchEvent(new Event("input"))
 			organizationSelect.dispatchEvent(new Event("change"))
 			form.append(fieldset)
 			nameInput.focus()
 		})
+		addButton.click()
 
 		shareButton.addEventListener("click", () => {
 			const text = listItemsToText(ol.querySelectorAll("li"))
@@ -121,9 +131,6 @@
 				alert("Saluti copiati negli appunti!")
 			}
 		})
-
-		currentYearSpan.innerText = `${currentYear}/${currentYear + 1}`
-		addButton.click()
 
 		/** @typedef {{name: string, organization: string, organizationSortOrder: number, role: string, roleSortOrder: number, year: number, club: string, clubFoundationDate: Date}} Person */
 
@@ -350,6 +357,12 @@
 			<section id="participants">
 				<h2>Partecipanti</h2>
 				<form>
+					<label>
+						Considera come anno corrente l'A.R.
+						<input type="number" name="current-year" min="1900" max="2100" style="width: min-content">
+						/
+						<span id="current-year-plus-one"></span>
+					</label>
 					<template>
 						<fieldset>
 							<label>
@@ -413,7 +426,9 @@
 							</label>
 							<label>
 								A.R.
-								<input type="number" name="year" min="1900" max="2100" placeholder="A.R.">
+								<input type="number" name="year" min="1900" max="2100" placeholder="A.R." style="width: min-content">
+								/
+								<span class="year-plus-one"></span>
 							</label>
 							<details>
 								<summary>Campi opzionali</summary>
@@ -577,7 +592,6 @@
 				<br>
 				A.R. 2024/2025
 			</p>
-			<p><small>L'algoritmo considera come annata corrente l'A.R. <span id="currentYear"></span></small></p>
 		</small>
 	</footer>
 </body>
