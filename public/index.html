@@ -101,7 +101,6 @@
 				const organization = getSelectedOptionText(organizationSelect)
 				filterRoles(roleSelect, organization)
 				filterClubs(clubSelect, organization)
-				updateClubFoundationDate(clubFoundationDateInput, clubSelect)
 			})
 			organizationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", () => yearPlusOneSpan.innerText = (parseInt(yearInput.value) + 1).toString())
@@ -182,6 +181,7 @@
 
 			clubSelect.replaceChildren(...clubSelectTemplateClone.children)
 			clubSelect.options[0].selected = true
+			clubSelect.dispatchEvent(new Event("change"))
 		}
 
 		/**
