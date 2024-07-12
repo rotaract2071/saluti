@@ -91,8 +91,10 @@
 			const organizationSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="organization"]'))
 			const yearInput = /** @type {HTMLInputElement} */ (fieldset.querySelector('input[name="year"]'))
 			const yearPlusOneSpan = /** @type {HTMLSpanElement} */ (fieldset.querySelector("span.year-plus-one"))
+			const yearLabel = /** @type {HTMLLabelElement} */(yearInput.closest("label"))
 			const clubSelect = /** @type {HTMLSelectElement} */ (fieldset.querySelector('select[name="club"]'))
 			const clubFoundationDateInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-date"]'))
+			const optionalFieldsDetails = /** @type {HTMLDetailsElement} */(fieldset.querySelector("details"))
 			const removeButton = /** @type {HTMLButtonElement} */ (fieldset.querySelector("button.remove"))
 
 			nameInput.addEventListener("input", requestFormSubmit)
@@ -101,6 +103,8 @@
 				const organization = getSelectedOptionText(organizationSelect)
 				filterRoles(roleSelect, organization)
 				filterClubs(clubSelect, organization)
+				yearLabel.hidden = organization === "Altro"
+				optionalFieldsDetails.hidden = organization === "Altro"
 			})
 			organizationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", () => yearPlusOneSpan.innerText = (parseInt(yearInput.value) + 1).toString())
