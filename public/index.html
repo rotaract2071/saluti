@@ -95,22 +95,19 @@
 			const clubFoundationDateInput = /** @type {HTMLInputElement} */(fieldset.querySelector('input[name="club-foundation-date"]'))
 			const removeButton = /** @type {HTMLButtonElement} */ (fieldset.querySelector("button.remove"))
 
-			const rolesOptions = roleSelect.options
-			const clubOptGroups = clubSelect.querySelectorAll("optgroup")
-			const noneClubOption = /** @type {HTMLOptionElement} */ (clubSelect.querySelector("option.none"))
-
 			nameInput.addEventListener("input", requestFormSubmit)
 			roleSelect.addEventListener("change", requestFormSubmit)
 			organizationSelect.addEventListener("change", () => {
 				const organization = getSelectedOptionText(organizationSelect)
 				filterRoles(roleSelect, organization)
 				filterClubs(clubSelect, organization)
+				updateClubFoundationDate(clubFoundationDateInput, clubSelect)
 			})
 			organizationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", () => yearPlusOneSpan.innerText = (parseInt(yearInput.value) + 1).toString())
 			yearInput.addEventListener("input", requestFormSubmit)
-			clubSelect.addEventListener("input", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption))
-			clubSelect.addEventListener("input", requestFormSubmit)
+			clubSelect.addEventListener("change", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect))
+			clubSelect.addEventListener("change", requestFormSubmit)
 			clubFoundationDateInput.addEventListener("input", requestFormSubmit)
 			removeButton.addEventListener("click", () => fieldset.remove())
 
@@ -188,36 +185,12 @@
 		}
 
 		/**
-		 * @param {HTMLOptionElement|HTMLOptGroupElement} element
-		 */
-		function show(element) {
-			toggleVisibility(element, true)
-		}
-
-		/**
-		 * @param {HTMLOptionElement|HTMLOptGroupElement} element
-		 */
-		function hide(element) {
-			toggleVisibility(element, false)
-		}
-
-		/**
-		 * @param {HTMLOptionElement|HTMLOptGroupElement} element
-		 * @param {boolean} visible
-		 */
-		function toggleVisibility(element, visible) {
-			element.hidden = !visible
-			element.disabled = !visible
-		}
-
-		/**
 		 * @param {HTMLInputElement} clubFoundationDateInput
 		 * @param {HTMLSelectElement} clubSelect
-		 * @param {HTMLOptionElement} noneClubOption
 		 */
-		function updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption) {
+		function updateClubFoundationDate(clubFoundationDateInput, clubSelect) {
 			clubFoundationDateInput.value = clubSelect.value
-			clubFoundationDateInput.disabled = clubSelect.value !== "" || noneClubOption.isSameNode(clubSelect.selectedOptions[0])
+			clubFoundationDateInput.disabled = clubSelect.value !== "" || clubSelect.selectedOptions[0].isSameNode(clubSelect.querySelector("option.none"))
 		}
 
 		function renderList() {
