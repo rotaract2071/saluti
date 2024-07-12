@@ -65,6 +65,8 @@
 		const currentYearInput = /** @type {HTMLInputElement} */ (form.querySelector('input[name="current-year"]'))
 		const currentYearPlusOneSpan = /** @type {HTMLSpanElement} */ (document.getElementById("current-year-plus-one"))
 		const template = /** @type {HTMLTemplateElement} */ (document.querySelector("template"))
+		const roleSelectTemplate = /** @type {HTMLSelectElement} */ (template.content.querySelector('select[name="role"]'))
+		const clubSelectTemplate = /** @type {HTMLSelectElement} */ (template.content.querySelector('select[name="club"]'))
 		const addButton = /** @type {HTMLButtonElement} */ (document.getElementById("add"))
 		const shareButton = /** @type {HTMLButtonElement} */ (document.getElementById("share"))
 		const ol = /** @type {HTMLOListElement} */ (document.querySelector("ol"))
@@ -99,9 +101,11 @@
 
 			nameInput.addEventListener("input", requestFormSubmit)
 			roleSelect.addEventListener("change", requestFormSubmit)
-			organizationSelect.addEventListener("change", () => filterRoles(rolesOptions, getSelectedOptionText(organizationSelect)))
-			organizationSelect.addEventListener("change", () => filterClubs(clubOptGroups, getSelectedOptionText(organizationSelect), noneClubOption))
-			organizationSelect.addEventListener("change", () => updateClubFoundationDate(clubFoundationDateInput, clubSelect, noneClubOption))
+			organizationSelect.addEventListener("change", () => {
+				const organization = getSelectedOptionText(organizationSelect)
+				filterRoles(roleSelect, organization)
+				filterClubs(clubSelect, organization)
+			})
 			organizationSelect.addEventListener("change", requestFormSubmit)
 			yearInput.addEventListener("input", () => yearPlusOneSpan.innerText = (parseInt(yearInput.value) + 1).toString())
 			yearInput.addEventListener("input", requestFormSubmit)
@@ -147,32 +151,40 @@
 		}
 
 		/**
-		 * @param {HTMLOptionsCollection} optionsCollection
+		 * @param {HTMLSelectElement} roleSelect
 		 * @param {string} organization
 		 */
-		function filterRoles(optionsCollection, organization) {
-			const options = Array.from(optionsCollection)
-			options.forEach(hide)
-			options.filter((option) => [organization, undefined].includes(option.dataset.organization)).forEach(show)
-			options.filter((option) => !option.hidden)[0].selected = true
+		function filterRoles(roleSelect, organization) {
+			const roleSelectTemplateClone = /** @type {HTMLSelectElement} */ (roleSelectTemplate.cloneNode(true))
+
+			Array
+				.from(roleSelectTemplateClone.options)
+				.filter((option) => option.dataset.organization !== organization)
+				.forEach((option) => option.remove())
+
+			Array
+				.from(roleSelectTemplateClone.querySelectorAll("optgroup"))
+				.filter((optgroup) => optgroup.querySelectorAll("option").length === 0)
+				.forEach((optgroup) => optgroup.remove())
+
+			roleSelect.replaceChildren(...roleSelectTemplateClone.children)
+			roleSelect.options[0].selected = true
 		}
 
 		/**
-		 * @param {NodeListOf<HTMLOptGroupElement>} optGroupList
+		 * @param {HTMLSelectElement} clubSelect
 		 * @param {string} organization
-		 * @param {HTMLOptionElement} noneClubOption
 		 */
-		function filterClubs(optGroupList, organization, noneClubOption) {
-			const optGroups = Array.from(optGroupList)
-			optGroups.forEach((optGroup) => {
-				hide(optGroup)
-				optGroup.querySelectorAll("option").forEach(hide)
-			})
-			optGroups.filter((optGroup) => optGroup.dataset.organization === organization).forEach((optGroup) => {
-				show(optGroup)
-				optGroup.querySelectorAll("option").forEach(show)
-			})
-			noneClubOption.selected = true
+		function filterClubs(clubSelect, organization) {
+			const clubSelectTemplateClone = /** @type {HTMLSelectElement} */ (clubSelectTemplate.cloneNode(true))
+
+			Array
+				.from(clubSelectTemplateClone.querySelectorAll("optgroup"))
+				.filter((optgroup) => optgroup.dataset.organization !== organization)
+				.forEach((optgroup) => optgroup.remove())
+
+			clubSelect.replaceChildren(...clubSelectTemplateClone.children)
+			clubSelect.options[0].selected = true
 		}
 
 		/**
@@ -343,7 +355,7 @@
 			const b = document.createElement("b")
 			b.innerText = person.name
 			li.append(b)
-			li.innerHTML += `<br><small>${person.role} ${person.organization}${person.roleSortOrder >= 200 && !isNaN(person.clubFoundationDate.valueOf()) ? `<br>${person.organization} Club ${person.club}` : ""}<br>A.R. ${person.year}/${person.year + 1}</small>`
+			li.innerHTML += `<br><small>${person.role} ${person.roleSortOrder >= 200 && !isNaN(person.clubFoundationDate.valueOf()) ? `${person.organization} Club ${person.club}` : ""}${person.organization !== "Altro" ? `<br>A.R. ${person.year}/${person.year + 1}` : ""}</small>`
 			return li
 		}
 	</script>
@@ -376,6 +388,7 @@
 									<option value="1">Rotaract</option>
 									<option value="2">Rotary</option>
 									<option value="3">Interact</option>
+									<option value="4">Altro</option>
 								</select>
 							</label>
 							<label>
@@ -384,45 +397,47 @@
 									<optgroup label="Direttivo distrettuale">
 										<option data-organization="Rotary" value="001">Governatore</option>
 										<option data-organization="Rotaract" value="001">Rappresentante Distrettuale</option>
-										<option data-organization="Interact" value="001">Rappresentante Distrettuale</option>
+										<option data-organization="Interact" value="001">Rappresentante Distrettuale Interact</option>
 										<option data-organization="Rotary" value="002">Vicegovernatore</option>
-										<option value="003">Relatore</option>
-										<option value="004">Carica politica</option>
-										<option value="005">Carica militare</option>
-										<option value="006">Carica ecclesiastica</option>
-										<option value="007">Segretario Distrettuale</option>
-										<option value="008">Tesoriere Distrettuale</option>
-										<option value="009">Prefetto Distrettuale</option>
+										<option data-organization="Rotaract" value="007">Segretario Distrettuale</option>
+										<option data-organization="Rotary" value="007">Segretario Distrettuale Rotary</option>
+										<option data-organization="Interact" value="007">Segretario Distrettuale Interact</option>
+										<option data-organization="Rotaract" value="008">Tesoriere Distrettuale</option>
+										<option data-organization="Rotary" value="008">Tesoriere Distrettuale Rotary</option>
+										<option data-organization="Interact" value="008">Tesoriere Distrettuale Interact</option>
+										<option data-organization="Rotaract" value="009">Prefetto Distrettuale</option>
+										<option data-organization="Rotary" value="009">Prefetto Distrettuale Rotary</option>
+										<option data-organization="Interact" value="009">Prefetto Distrettuale Interact</option>
 									</optgroup>
 									<optgroup label="Esecutivo distrettuale">
 										<option data-organization="Rotary" value="100">Assistente del Governatore</option>
+										<option data-organization="Rotaract" value="170">Delegato di Zona</option>
 										<option data-organization="Rotaract" value="110">Presidente Commissione Azione Interna</option>
 										<option data-organization="Rotaract" value="111">Presidente Commissione Azione Interesse Pubblico</option>
 										<option data-organization="Rotaract" value="112">Presidente Commissione Azione Internazionale</option>
 										<option data-organization="Rotaract" value="113">Presidente Commissione Azione Nuove Generazioni</option>
 										<option data-organization="Rotaract" value="114">Presidente Commissione Azione Professionale</option>
-										<option data-organization="Rotary" value="120">Presidente Commissione Via d'Azione</option>
+										<option data-organization="Rotary" value="120">Presidente Commissione Via d'Azione del Rotary</option>
 										<option data-organization="Rotaract" value="130">Presidente Commissione Comunicazione e Informatica</option>
 										<option data-organization="Rotaract" value="131">Presidente Commissione Cultura</option>
 										<option data-organization="Rotaract" value="132">Presidente Commissione Regolamento</option>
 										<option data-organization="Rotaract" value="133">Presidente Commissione Revisione dei Conti</option>
 										<option data-organization="Rotaract" value="134">Presidente Commissione Sport</option>
-										<option data-organization="Rotary" value="140">Presidente Commissione</option>
+										<option data-organization="Rotary" value="140">Presidente Commissione del Rotary</option>
 										<option data-organization="Rotaract" value="150">Presidente Sottocommissione Fondazione Rotary</option>
 										<option data-organization="Rotaract" value="151">Presidente Sottocommissione Sviluppo Effettivo</option>
-										<option data-organization="Rotary" value="160">Presidente Sottocommissione</option>
-										<option data-organization="Rotaract" value="170">Delegato di zona</option>
+										<option data-organization="Rotary" value="160">Presidente Sottocommissione del Rotary</option>
 									</optgroup>
 									<optgroup label="Cariche di club">
-										<option value="200">Presidente</option>
+										<option data-organization="Rotaract" value="200">Presidente</option>
+										<option data-organization="Rotary" value="200">Presidente</option>
+										<option data-organization="Interact" value="200">Presidente Interact Club</option>
 										<option data-organization="Rotary" value="201">Delegato Rotary per il Rotaract</option>
-										<option value="202">Vicepresidente</option>
-										<option value="203">Segretario</option>
-										<option value="204">Tesoriere</option>
-										<option value="205">Prefetto</option>
-										<option value="206">Consigliere</option>
-										<option value="207">Socio</option>
 									</optgroup>
+									<option data-organization="Altro" value="003">Relatore</option>
+									<option data-organization="Altro" value="004">Carica politica</option>
+									<option data-organization="Altro" value="005">Carica militare</option>
+									<option data-organization="Altro" value="006">Carica ecclesiastica</option>
 								</select>
 							</label>
 							<label>
