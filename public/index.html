@@ -211,7 +211,7 @@
 				.map(fieldsetToPerson)
 				.filter(personHasNameAndYear)
 				.sort(compare)
-				.map(detailTemporallyRoleOf)
+				.map(enrichRoleName)
 				.map(personToListItem)
 		}
 
@@ -308,7 +308,7 @@
 		 * @param {Person} person
 		 * @returns {Person}
 		 */
-		function detailTemporallyRoleOf(person) {
+		function enrichRoleName(person) {
 			if (person.year < currentYear - 1) {
 				person.role = `Past ${person.role}`
 			} else if (person.year === currentYear - 1) {
