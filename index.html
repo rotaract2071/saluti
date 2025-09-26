@@ -35,22 +35,42 @@
 			top: var(--pico-spacing);
 		}
 
-		@media print {
-			* {
-				background-color: white;
-				color: black !important;
-			}
+		body {
+		background-color: var(--background);
+		color: var(--text);
+		transition: background-color 0.3s ease, color 0.3s ease;
+		}
 
-			h1,
-			#participants,
-			button,
-			footer {
-				display: none;
-			}
+		.dark-theme-toggle {
+		position: fixed;
+		top: 1rem;
+		right: 1rem;
+		z-index: 1000;
+		user-select: none;
+		}
 
-			.sticky {
-				position: static;
-			}
+		.dark-theme-toggle button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.25rem;
+		color: var(--text);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: color 0.3s ease;
+		}
+
+		.dark-theme-toggle button svg {
+		width: 40px;
+		height: 40px;
+		stroke-width: 2.5;
+		transition: transform 0.3s ease, stroke 0.3s ease;
+		color: var(--text);
+		}
+
+		.dark-theme-toggle button:hover svg {
+		transform: rotate(30deg);
 		}
 	</style>
 	<script type="module">
@@ -336,12 +356,37 @@
 			return li
 		}
 	</script>
-</head>
-
+</head>	
 <body class="container">
 	<noscript>Abilita JavaScript per utilizzare questa web app.</noscript>
 	<main>
-		<h1 style="text-align: center">saluto.app</h1>
+		<header style="display: flex; justify-content: center; padding: 1rem 0;">
+			<a href="/" aria-label="Homepage">
+			<img src="./logo-rotaract.svg" alt="Logo Distretto Rotaract 2071" style="height: 150px;">
+			</a>
+		</header>
+
+		<!-- Toggle tema in alto a destra -->
+		<div class="dark-theme-toggle">
+			<button id="theme-toggle-button" aria-label="Toggle tema" title="Cambia tema">
+			<svg
+				id="theme-toggle-icon"
+				xmlns="http://www.w3.org/2000/svg"
+				width="24" height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path d="M21 12.79A9 9 0 0 1 11.21 3 
+						7 7 0 1 0 21 12.79z"></path>
+			</svg>
+			</button>
+		</div>
+
+		<h1 style="text-align: center; color: #d41367;">saluto.app</h1>
 		<div class="grid">
 			<section id="participants">
 				<h2>Partecipanti</h2>
@@ -575,7 +620,7 @@
 	<footer style="text-align: center">
 		<hr>
 		<small>
-			<p>Credits: <a href="https://danieleambrosino.it" target="_blank">Daniele Ambrosino</a>, <a href="https://linktr.ee/grazia_pachioli" target="_blank">Grazia Pachioli</a>, <a href="https://www.linkedin.com/in/malvina-rosseti-716ba1301/" target="_blank">Malvina Rosseti</a></p>
+			<p>Credits: <a href="https://danieleambrosino.it" target="_blank">Daniele Ambrosino</a>, <a href="https://linktr.ee/grazia_pachioli" target="_blank">Grazia Pachioli</a>, <a href="https://www.linkedin.com/in/malvina-rosseti-716ba1301/" target="_blank">Malvina Rosseti</a>, <a href="https://albertomarini.com" target="_blank">Alberto Marini</a></p>
 			<p>
 				© <a target="_blank" href="https://rotaract2071.org">Distretto Rotaract 2071</a>
 				<br>
@@ -583,10 +628,51 @@
 				<br>
 				<small>in collaborazione con il Direttivo Distrettuale</small>
 				<br>
-				A.R. 2024/2025
+				A.R. 2025/2026
 			</p>
 		</small>
 	</footer>
+<script type="module">
+  const html = document.documentElement;
+  const toggleButton = document.getElementById("theme-toggle-button");
+  const toggleIcon = document.getElementById("theme-toggle-icon");
+
+  function setTheme(theme) {
+    html.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+    updateIcon(theme);
+  }
+
+  function updateIcon(theme) {
+    toggleIcon.innerHTML = theme === "dark"
+      ? `<path d="M21 12.79A9 9 0 0 1 11.21 3 
+           7 7 0 1 0 21 12.79z"></path>` // luna
+      : `<circle cx="12" cy="12" r="5"></circle>
+         <line x1="12" y1="1" x2="12" y2="3"></line>
+         <line x1="12" y1="21" x2="12" y2="23"></line>
+         <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+         <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+         <line x1="1" y1="12" x2="3" y2="12"></line>
+         <line x1="21" y1="12" x2="23" y2="12"></line>
+         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`; // sole
+  }
+
+  toggleButton.addEventListener("click", () => {
+    const current = html.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    const newTheme = current === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+  });
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme");
+    const theme = savedTheme === "light" || savedTheme === "dark"
+      ? savedTheme
+      : "dark";
+    setTheme(theme);
+  });
+</script>
+
 </body>
 
 </html>
